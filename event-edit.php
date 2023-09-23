@@ -207,17 +207,17 @@ function getEvent($connection, $event_id) {
                                                                 </select>
                                                             </div>
                                                         </div>
+                                                        <button type="button" class="btn btn-info" onclick="addTechnology(<?php echo $sessionIndexCounter; ?>)">Add Technology</button>
                                                         <?php
-
+                                                            $technologies = getSessionTechnologies($connection, $session['session_id']);
+                                                                if ($technologies) {
+                                                                    $techIndexCounter = 0;
+                                                                    foreach ($technologies as $technology) { 
                                                         ?>
-                                                        <div class="col-md-12" id="techContainer-<?php echo $sessionIndexCounter; ?>">
-                                                            <button type="button" class="btn btn-info" onclick="addTechnology(<?php echo $sessionIndexCounter; ?>)">Add Technology</button>
+                                                        <div class="col-md-12" id="techContainer-<?php echo $sessionIndexCounter; ?>-<?php echo $techIndexCounter; ?>">
                                                             <div class="form-group">
                                                                 <?php
-                                                                    $technologies = getSessionTechnologies($connection, $session['session_id']);
-                                                                    if ($technologies) {
-                                                                        $techIndexCounter = 0;
-                                                                        foreach ($technologies as $technology) { 
+                                                                    
                                                                             $techLines = getProductAndTechnologyLines($connection, $technology['technology_id']);
                                                                             if ($techLines) {
                                                                                 $lineIndexCounter = 0;
@@ -260,7 +260,7 @@ function getEvent($connection, $event_id) {
                                                                                     }
                                                                                     else { ?>
                                                                                         <div class="row">
-                                                                                            <div class="col-md-3"></div>
+                                                                                            <div class="col-md-4"></div>
                                                                                             <div class="col-md-3">
                                                                                                 <label>Product:</label>
                                                                                                 <input type="text" class="form-control"
@@ -279,28 +279,24 @@ function getEvent($connection, $event_id) {
                                                                                                     data-line-index="<?php echo $lineIndexCounter; ?>"
                                                                                                     value="<?php echo $value['technology_line']; ?>">
                                                                                             </div>
-                                                                                            <div class="col-md-3">
-                                                                                                <button type="button" style="margin-top: 6%;" class="btn btn-danger" onclick="removeProductAndLine(<?php echo $sessionIndexCounter; ?>, <?php echo $techIndexCounter; ?>, <?php echo $lineIndexCounter; ?>)">Remove Product and Technology Line</button>
-                                                                                            </div>
                                                                                         </div>
-                                                                                    <?php
-                                                                                    }
-                                                                                    $lineIndexCounter++;
-                                                                                }
-                                                                            }
-                                                                            }
+                                                                                    <?php 
+                                                                                    } 
+                                                                                    $lineIndexCounter++; 
+                                                                                } 
+                                                                            } 
                                                                             $techIndexCounter++;
-                                                                        }
-                                                                    }
                                                                 ?>
                                                             </div>
                                                         </div>
+                                                        <?php    }
+                                                                    } ?>
                                                     </div>
                                                 </div>
                                             <?php
                                                 $sessionIndexCounter++;
                                             }
-                                        
+                                        }
                                         ?>
                                     </div>
                                 </form>
@@ -338,7 +334,7 @@ function getEvent($connection, $event_id) {
 
     // Function to add a new session
     function addSession() {
-        sessionIndex++;
+        
         const sessionContainer = document.getElementById("sessionContainer");
 
         // Create a new session div
@@ -368,6 +364,7 @@ function getEvent($connection, $event_id) {
 
         // Append the new session to the container
         sessionContainer.appendChild(sessionDiv);
+        sessionIndex++;
     }
 
     // Function to remove a technology element within a session
@@ -449,7 +446,6 @@ function addProductAndLine(sessionIndex, techIndex) {
         techContainer.appendChild(newRow);
     }
 }
-
 
 
 
