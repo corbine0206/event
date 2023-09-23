@@ -217,7 +217,7 @@ function getEvent($connection, $event_id) {
                                                                         foreach ($technologies as $technology) { 
                                                             ?>
                                                             
-                                                            <div class="form-group">
+                                                            <div class="form-group" data-tech-index="<?php echo $techIndexCounter; ?>">
                                                                 <?php
                                                                     
                                                                             $techLines = getProductAndTechnologyLines($connection, $technology['technology_id']);
@@ -255,7 +255,7 @@ function getEvent($connection, $event_id) {
                                                                                                     onclick="addProductAndLine(<?php echo $sessionIndexCounter; ?>, <?php echo $techIndexCounter; ?>)">Add Product and Technology Line</button>
                                                                                                 <button type="button" class="btn btn-danger"
                                                                                                     data-remove-index="<?php echo $techIndexCounter; ?>"
-                                                                                                    onclick="removeTechnology(<?php echo $sessionIndexCounter; ?>, <?php echo $techIndexCounter; ?>)">Remove Technology <?php echo $techIndexCounter; ?></button>
+                                                                                                    onclick="removeTechnology(<?php echo $sessionIndexCounter; ?>, <?php echo $techIndexCounter; ?>)">Remove Technology</button>
                                                                                             </div>
                                                                                         </div>
                                                                                     <?php 
@@ -370,19 +370,18 @@ function getEvent($connection, $event_id) {
             sessionContainer.appendChild(sessionDiv);
             
         }
+       function removeTechnology(sessionIndex, techIndex) {
+            console.log(`sessionIndex ${sessionIndex}, techIndex ${techIndex} removed`);
 
-        // Function to remove a technology element within a session
-        function removeTechnology(sessionIndex, techIndex) {
-            console.log(`sessionIndex${sessionIndex}, techIndex${techIndex}`);
             const techContainer = document.getElementById(`techContainer-${sessionIndex}`);
-            const techDivs = techContainer.querySelectorAll('.form-group');
+            const techToRemove = techContainer.querySelector(`.form-group[data-tech-index="${techIndex}"]`);
 
-            // Check if the techIndex is valid
-            if (techIndex >= 0 && techIndex < techDivs.length) {
-                const techToRemove = techDivs[techIndex];
+            if (techToRemove) {
                 techToRemove.remove();
             }
         }
+
+
 
         // Function to remove a product and technology line within a technology element
         function removeProductAndLine(sessionIndex, techIndex, lineIndex) {
@@ -432,16 +431,36 @@ function getEvent($connection, $event_id) {
             }
         }
 
-        // Function to add a new technology element within a session
         function addTechnology(sessionIndex) {
+            // Calculate the next available techIndex based on existing technologies
             const techContainer = document.getElementById(`techContainer-${sessionIndex}`);
-            const techDiv = document.createElement("div");
-            techDiv.className = "form-group";
+            const techDivs = techContainer.querySelectorAll('.form-group[data-tech-index]');
+            const techIndex = techDivs.length;
 
-            // Initialize the technology index for this session
-            let techIndex = techContainer.querySelectorAll('.form-group').length;
+            // Create a new technology element
+            const newTechDiv = document.createElement('div');
+            newTechDiv.classList.add('form-group');
+            newTechDiv.setAttribute('data-tech-index', techIndex); // Set data-tech-index
 
-            techDiv.innerHTML = `
+            // Add your technology input fields and buttons to the newTechDiv here
+
+            // Append the new technology to the container
+            techContainer.appendChild(newTechDiv);
+        }
+
+        function addTechnology(sessionIndex) {
+            // Calculate the next available techIndex based on existing technologies
+            const techContainer = document.getElementById(`techContainer-${sessionIndex}`);
+            const techDivs = techContainer.querySelectorAll('.form-group[data-tech-index]');
+            const techIndex = techDivs.length;
+
+            // Create a new technology element
+            const newTechDiv = document.createElement('div');
+            newTechDiv.classList.add('form-group');
+            newTechDiv.setAttribute('data-tech-index', techIndex); // Set data-tech-index
+
+            // Add technology input fields and buttons to the newTechDiv here
+            newTechDiv.innerHTML = `
                 <div class="row">
                     <div class="col-md-4">
                         <label>Technology:</label>
@@ -465,14 +484,13 @@ function getEvent($connection, $event_id) {
             `;
 
             // Append the new technology to the container
-            techContainer.appendChild(techDiv);
-
-            // Initialize the technology line indices
-            initTechLineIndices(sessionIndex, techIndex);
+            techContainer.appendChild(newTechDiv);
         }
+
 
         // Function to add a product and technology line within a technology element
     function addProductAndLine(sessionIndex, techIndex) {
+        console.log(`session Index : ${sessionIndex}, techIndex ${techIndex}`);
         const techContainer = document.getElementById(`techContainer-${sessionIndex}`);
         const techDiv = techContainer.querySelectorAll('.form-group')[techIndex];
 
