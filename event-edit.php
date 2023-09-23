@@ -193,6 +193,7 @@ function getEvent($connection, $event_id) {
                                                             <input type="text" id="session-<?php echo $sessionIndexCounter; ?>"
                                                                 class="form-control" name="session[]"
                                                                 value="<?php echo $session['session_title']; ?>" required>
+                                                                <input type="" name="event_id" value="<?php echo $event_id; ?>">
                                                         </div>
                                                         <div class="col-md-4">
                                                             <label for="schedule-<?php echo $sessionIndexCounter; ?>">Schedule:</label>
@@ -207,7 +208,10 @@ function getEvent($connection, $event_id) {
                                                                 </select>
                                                             </div>
                                                         </div>
-                                                        <button type="button" class="btn btn-info" onclick="addTechnology(<?php echo $sessionIndexCounter; ?>)">Add Technology</button>
+                                                        <div class="col-md-8">
+                                                            <button type="button" class="btn btn-info" onclick="addTechnology(<?php echo $sessionIndexCounter; ?>)">Add Technology</button>    
+                                                        </div>
+                                                        
                                                         <?php
                                                             $technologies = getSessionTechnologies($connection, $session['session_id']);
                                                                 if ($technologies) {

@@ -13,6 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if (mysqli_query($connection, $eventInsertSql)) {
             $event_id = mysqli_insert_id($connection); // Get the event_id of the newly inserted event
+            $oldEventID  = $_POST['event_id'];
             $deleteEvent = "DELETE from events where event_id = '$oldEventID'";
 
             $deleteSession = "DELETE from event_sessions where event_id = '$oldEventID'";
@@ -22,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             mysqli_query($connection, $deleteSession);
             mysqli_query($connection, $deleteTechnology);
             mysqli_query($connection, $deleteProductTechnologyLine);
-            
+
             if (isset($_POST['session']) && is_array($_POST['session'])) {
                 foreach ($_POST['session'] as $sessionIndex => $sessionTitle) {
                     $sessionTitle = mysqli_real_escape_string($connection, $sessionTitle);
