@@ -166,141 +166,117 @@ function getEvent($connection, $event_id) {
                                 <h2>Update Event</h2>
                             </div>
                             <div class="card-body">
-                                <form id="eventForm" method="POST" enctype="multipart/form-data" action="update_event.php">
-                                    <input type="hidden" name="event_id" value="<?php echo $event_id; ?>">
-                                    <?php
-                                    $event = getEvent($connection, $event_id);
-                                    if ($event) {
-                                        ?>
-                                        <div class="form-group">
-                                            <label for="eventTitle">Event Title:</label>
-                                            <input type="text" id="eventTitle" name="eventTitle" class="form-control"
-                                                required value="<?php echo $event['event_title']; ?>">
-                                        </div>
+                                <form id="eventForm" method="POST" enctype="multipart/form-data" action="insert_event1.php">
+                                    <div class="form-group">
+                                        <label for="eventTitle">Event Title:</label>
+                                        <input type="text" id="eventTitle" name="eventTitle" class="form-control" required="">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="csvFile">Select a CSV file:</label>
+                                        <input type="file" class="form-control-file" name="csvFile" id="csvFile" accept=".csv">
+                                    </div>
+                                     <div id="sessionContainer">
+                                        <!-- Sessions will be added here -->
                                         <?php
-                                    }
-                                    ?>
-                                    <div id="sessionContainer">
-                                        <?php
-                                        $sessions = getEventSessions($event_id);
-                                        if ($sessions) {
-                                            $sessionIndexCounter = 0;
-                                            foreach ($sessions as $session) { ?>
-                                                <div class="session">
-                                                    <div class="row">
-                                                        <div class="col-md-4">
-                                                            <label for="session-<?php echo $sessionIndexCounter; ?>">Session:</label>
-                                                            <input type="text" id="session-<?php echo $sessionIndexCounter; ?>"
-                                                                class="form-control" name="session[]"
-                                                                value="<?php echo $session['session_title']; ?>" required>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <label for="schedule-<?php echo $sessionIndexCounter; ?>">Schedule:</label>
-                                                            <div class="input-group">
-                                                                <input type="date" id="schedule-<?php echo $sessionIndexCounter; ?>"
-                                                                    class="form-control date-input" name="date[]"
-                                                                    value="<?php echo $session['date1'] ?>">
-                                                                <select class="form-control time-select" name="time[]" required>
-                                                                    <option value="<?php echo $session['time1'] ?>"><?php echo $session['time1'] ?></option>
-                                                                    <option value="06:00">06:00</option>
-                                                                    <option value="07:00">07:00</option>
-                                                                </select>
+                                            $sessions = getEventSessions($event_id);
+                                            if ($sessions) {
+                                                $sessionIndexCounter = 0;
+                                                foreach ($sessions as $session) { ?>
+                                                    <div class="session">
+                                                        <div class="row">
+                                                            <div class="col-md-4">
+                                                                <label for="session-<?php echo $sessionIndexCounter; ?>">Session:</label>
+                                                                <input type="text" id="session-<?php echo $sessionIndexCounter; ?>" class="form-control" name="session[]" required value="<?php echo $session['session_title']; ?>"> 
                                                             </div>
-                                                        </div>
-                                                        <?php
+                                                            <div class="col-md-4">
+                                                                <label for="schedule-0">Schedule:</label>
+                                                                <div class="input-group">
+                                                                    <input type="date" id="schedule-<?php echo $sessionIndexCounter; ?>" class="form-control date-input" name="date[]" required value="<?php echo $session['date1']; ?>">
+                                                                    <select class="form-control time-select" name="time[]" required="">
+                                                                        <option value="<?php echo $session['time1']; ?>"><?php echo $session['time1']; ?></option>
+                                                                        <option value="06:00">06:00</option>
+                                                                        <option value="07:00">07:00</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
 
-                                                        ?>
-                                                        <div class="col-md-12 techContainer">
-                                                            <button type="button" class="btn btn-info" onclick="addTechnology(<?php echo $sessionIndexCounter; ?>)">Add Technology</button>
-                                                            <div class="form-group">
+                                                            <div class="col-md-12" id="techContainer-<?php echo $sessionIndexCounter; ?>">
+                                                                <button type="button" class="btn btn-info" onclick="addTechnology(<?php echo $sessionIndexCounter; ?>)">Add Technology</button>
                                                                 <?php
                                                                     $technologies = getSessionTechnologies($connection, $session['session_id']);
-                                                                    if ($technologies) {
-                                                                        $techIndexCounter = 0;
-                                                                        foreach ($technologies as $technology) { 
-                                                                            $techLines = getProductAndTechnologyLines($connection, $technology['technology_id']);
-                                                                            if ($techLines) {
+                                                                        if ($technologies) {
+                                                                            $techIndexCounter = 0;
+                                                                            foreach ($technologies as $technology) { 
                                                                                 $lineIndexCounter = 0;
-                                                                                foreach ($techLines as $key => $value) {
-                                                                                    if ($lineIndexCounter == 0) { ?>
-                                                                                        <div class="row">
-                                                                                            <div class="col-md-4">
-                                                                                                <label>Technology:</label>
-                                                                                                <input type="text" class="form-control"
-                                                                                                    name="technology[<?php echo $sessionIndexCounter; ?>][]"
-                                                                                                    required="" value="<?php echo $technology['technology_name']; ?>">
+                                                                                $techLines = getProductAndTechnologyLines($connection, $technology['technology_id']);
+                                                                                if ($techLines) {
+                                                                                    foreach ($techLines as $key => $value) {
+                                                                                        echo '<div class="col-md-12" id="techContainer-'.$sessionIndexCounter.'-'. $techIndexCounter. '">';
+                                                                                        if ($lineIndexCounter == 0) { ?>
+                                                                                            <div class="form-group">
+                                                                                                <div class="row">
+                                                                                                    <div class="col-md-4">
+                                                                                                        <label>Technology:</label>
+                                                                                                        <input type="text" class="form-control" name="technology[<?php echo $sessionIndexCounter; ?>][]" value="<?php echo $technology['technology_name'] ?>">
+                                                                                                    </div>
+                                                                                                    <div class="row">
+                                                                                                        <div class="col-md-6">
+                                                                                                            <label>Product:</label>
+                                                                                                            <input type="text" class="form-control" name="product[<?php echo $sessionIndexCounter; ?>][<?php echo $techIndexCounter; ?>][]"  data-session-index="<?php echo $sessionIndexCounter; ?>" data-tech-index="<?php echo $techIndexCounter; ?>" data-line-index="<?php echo $lineIndexCounter; ?>" value="<?php echo $value['product_name']; ?>">
+                                                                                                        </div>
+                                                                                                        <div class="col-md-6">
+                                                                                                            <label>Technology Line:</label>
+                                                                                                            <input type="text" class="form-control" name="technologyLine[<?php echo $sessionIndexCounter; ?>][<?php echo $techIndexCounter; ?>][]"  data-session-index="<?php echo $sessionIndexCounter; ?>" data-tech-index="<?php echo $techIndexCounter; ?>" data-line-index="<?php echo $lineIndexCounter; ?>" value="<?php echo $value['technology_line']; ?>">
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    <div class="col-md-8">
+                                                                                                            <button type="button" class="btn btn-primary" onclick="addProductAndLine(<?php echo $sessionIndexCounter; ?>, <?php echo $techIndexCounter; ?>)">Add Product and Technology Line</button>
+                                                                                                            <button type="button" class="btn btn-danger" data-remove-index="<?php echo $lineIndexCounter; ?>" onclick="removeTechnology(<?php echo $sessionIndexCounter; ?>, <?php echo $techIndexCounter; ?>)">Remove Technology</button>
+                                                                                                        </div>
+                                                                                                </div>
                                                                                             </div>
-                                                                                            <div class="col-md-4">
-                                                                                                <label>Product:</label>
-                                                                                                <input type="text" class="form-control"
-                                                                                                    name="product[<?php echo $sessionIndexCounter; ?>][<?php echo $techIndexCounter; ?>][]"
-                                                                                                    required="" data-session-index="<?php echo $sessionIndexCounter; ?>"
-                                                                                                    data-tech-index="<?php echo $techIndexCounter; ?>"
-                                                                                                    data-line-index="<?php echo $lineIndexCounter; ?>"
-                                                                                                    value="<?php echo $value['product_name']; ?>">
-                                                                                            </div>
-                                                                                            <div class="col-md-4">
-                                                                                                <label>Technology Line:</label>
-                                                                                                <input type="text" class="form-control"
-                                                                                                    name="technologyLine[<?php echo $sessionIndexCounter; ?>][<?php echo $techIndexCounter; ?>][]"
-                                                                                                    required data-session-index="<?php echo $sessionIndexCounter; ?>"
-                                                                                                    data-tech-index="<?php echo $techIndexCounter; ?>"
-                                                                                                    data-line-index="<?php echo $lineIndexCounter; ?>"
-                                                                                                    value="<?php echo $value['technology_line']; ?>">
-                                                                                            </div>
-                                                                                            <div class="col-md-8">
-                                                                                                <button type="button" class="btn btn-primary"
-    onclick="addProductAndLine(this)">Add Product and Technology Line</button>
-
-                                                                                                <button type="button" class="btn btn-danger"
-                                                                                                    data-remove-index="<?php echo $techIndexCounter; ?>"
-                                                                                                    onclick="removeTechnology(<?php echo $sessionIndexCounter; ?>, <?php echo $techIndexCounter; ?>)">Remove Technology</button>
+                                                                                <?php 
+                                                                                    }
+                                                                                    else{ ?>
+                                                                                        <div class="form-group">
+                                                                                            <div class="row">
+                                                                                                <div class="col-md-4"></div>
+                                                                                                <div class="col-md-2">
+                                                                                                    <label>Product:</label>
+                                                                                                    <input type="text" class="form-control" name="product[<?php echo $sessionIndexCounter; ?>][<?php echo $techIndexCounter; ?>][]" data-session-index="<?php echo $sessionIndexCounter; ?>" data-tech-index="<?php echo $techIndexCounter; ?>" data-line-index="<?php echo $lineIndexCounter; ?>" value="<?php echo $value['product_name']; ?>">
+                                                                                                </div><div class="col-md-2">
+                                                                                                    <label>Technology Line:</label>
+                                                                                                    <input type="text" class="form-control" name="technologyLine[<?php echo $sessionIndexCounter; ?>][<?php echo $techIndexCounter; ?>][]" data-session-index="<?php echo $sessionIndexCounter; ?>" data-tech-index="<?php echo $techIndexCounter; ?>" data-line-index="<?php echo $lineIndexCounter; ?>" value="<?php echo $value['technology_line']; ?>">
+                                                                                                </div><div class="col-md-4">
+                                                                                                    <button type="button" style="margin-top: 6%;" class="btn btn-danger" data-remove-index="<?php echo $lineIndexCounter; ?>" onclick="removeProductAndLine(<?php echo $sessionIndexCounter; ?>, <?php echo $techIndexCounter; ?>, <?php echo $lineIndexCounter; ?>)">Remove Product and Technology Line</button>
+                                                                                                </div>
                                                                                             </div>
                                                                                         </div>
                                                                                     <?php 
                                                                                     }
-                                                                                    else { ?>
-                                                                                        <div class="row">
-                                                                                            <div class="col-md-4"></div>
-                                                                                            <div class="col-md-3">
-                                                                                                <label>Product:</label>
-                                                                                                <input type="text" class="form-control"
-                                                                                                    name="product[<?php echo $sessionIndexCounter; ?>][<?php echo $techIndexCounter; ?>][]"
-                                                                                                    required="" data-session-index="<?php echo $sessionIndexCounter; ?>"
-                                                                                                    data-tech-index="<?php echo $techIndexCounter; ?>"
-                                                                                                    data-line-index="<?php echo $lineIndexCounter; ?>"
-                                                                                                    value="<?php echo $value['product_name']; ?>">
-                                                                                            </div>
-                                                                                            <div class="col-md-3">
-                                                                                                <label>Technology Line:</label>
-                                                                                                <input type="text" class="form-control"
-                                                                                                    name="technologyLine[<?php echo $sessionIndexCounter; ?>][<?php echo $techIndexCounter; ?>][]"
-                                                                                                    required data-session-index="<?php echo $sessionIndexCounter; ?>"
-                                                                                                    data-tech-index="<?php echo $techIndexCounter; ?>"
-                                                                                                    data-line-index="<?php echo $lineIndexCounter; ?>"
-                                                                                                    value="<?php echo $value['technology_line']; ?>">
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    <?php 
-                                                                                    } 
                                                                                     $lineIndexCounter++; 
-                                                                                } 
-                                                                            } 
+                                                                                echo '</div>';
+                                                                                }
+                                                                                ?>
+                                                                            <?php
                                                                             $techIndexCounter++;
+                                                                            }
                                                                         }
                                                                     }
                                                                 ?>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            <?php
-                                                $sessionIndexCounter++;
+                                                <?php 
+                                                $sessionIndexCounter++;   
+                                                }
                                             }
-                                        }
                                         ?>
-                                    </div>
-                                </form>
+                                <!-- Submit Button -->
+                                <div class="text-center mt-3">
+                                    <button type="submit" form="eventForm" class="btn btn-success">Submit</button>
+                                </div>
+                            </form>
                             </div>
                             <!-- Add Session Button -->
                             <button type="button" class="btn btn-primary" id="addSessionBtn" onclick="addSession()">Add Session</button>
@@ -337,7 +313,7 @@ function getEvent($connection, $event_id) {
     function addSession() {
         
         const sessionContainer = document.getElementById("sessionContainer");
-
+        sessionIndex++;
         // Create a new session div
         const sessionDiv = document.createElement("div");
         sessionDiv.className = "session";
@@ -365,7 +341,6 @@ function getEvent($connection, $event_id) {
 
         // Append the new session to the container
         sessionContainer.appendChild(sessionDiv);
-        sessionIndex++;
     }
 
     // Function to remove a technology element within a session
@@ -413,14 +388,14 @@ function getEvent($connection, $event_id) {
     }
 
 // Function to add a product and technology line within a technology element
-    function addProductAndLine(buttonElement) {
-    console.log("Adding product and line");
+function addProductAndLine(sessionIndex, techIndex) {
+    console.log(`Adding product and line for session ${sessionIndex}, tech ${techIndex}`);
 
-    // Find the nearest techContainer element from the clicked button
-    const techContainer = buttonElement.closest('.techContainer');
+    // Find the technology container for the specified session and techIndex
+    const techContainer = document.getElementById(`techContainer-${sessionIndex}-${techIndex}`);
 
     if (techContainer) {
-       const lineIndex = techContainer.querySelectorAll(`input[name="product[${sessionIndex}][${techIndex}][]"]`).length;
+        const lineIndex = techContainer.querySelectorAll(`input[name="product[${sessionIndex}][${techIndex}][]"]`).length;
 
         // Create a new row for the product and technology line
         const newRow = document.createElement("div");
@@ -447,7 +422,6 @@ function getEvent($connection, $event_id) {
         techContainer.appendChild(newRow);
     }
 }
-
 
 
 
