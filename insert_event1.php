@@ -10,7 +10,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         // Insert the event title into the events table
         $eventInsertSql = "INSERT INTO events (event_title, user_id, event_status) VALUES ('$eventTitle', '$user_id', 1)";
-
+        echo $eventInsertSql;
         if (mysqli_query($connection, $eventInsertSql)) {
             $event_id = mysqli_insert_id($connection); // Get the event_id of the newly inserted event
 
@@ -159,7 +159,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $participantsSql = "INSERT INTO participants(event_id, email, status) VALUES('$event_id', '$value', 0)";
                 mysqli_query($connection, $participantsSql);
             } else {
-                echo 'Email sending failed to ' . $to . '<br>';
+               
             }
         }
     } else {

@@ -49,6 +49,7 @@
                                 <div class="form-group">
                                     <label for="eventTitle">Event Title:</label>
                                     <input type="text" id="eventTitle" name="eventTitle" class="form-control" required>
+                                    <input type="text" name="user_id" value="<?php echo $user_id; ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="csvFile">Select a CSV file:</label>

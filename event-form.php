@@ -23,6 +23,37 @@
         echo 'Error: ' . $e->getMessage();
     }
     ?>
+    <?php
+    if (isset($_POST['btnSubmit'])) {
+        $connection = openConnection();
+        $email = $_GET['email'];
+        $updateSql = "UPDATE events set event_status = 2 where event_id = '$event_id'";
+        mysqli_query($connection, $updateSql);
+        $userUpdate = "UPDATE participants set status = 1 where event_id = '$event_id' and email = '$email'";
+        mysqli_query($connection, $userUpdate);
+        if (isset($_POST["technology"])) {
+            $selectedTechnologies = $_POST["technology"];
+
+            foreach ($selectedTechnologies as $selectedTechId) {
+                $selectedDropdownValue = $_POST["dropdown_" . $selectedTechId];
+                $dataExplode = explode("-", $selectedDropdownValue);
+                $response = $dataExplode[0];
+                $product_id = $dataExplode[1];
+                $technology_id = $dataExplode[2];
+                $session_id = $dataExplode[3];
+                // Insert the selected technology_id and dropdown value into your database
+                 $insertSql = "INSERT INTO response (event_id, email, product_id, technology_id, session_id, response) VALUES ('$event_id','$email', '$product_id', '$technology_id', '$session_id', '$response')";
+
+                 if (mysqli_query($connection, $insertSql)) {
+                     echo 'Data inserted successfully for technology ID ' . $selectedTechId . '<br>';
+                 } else {
+                     echo 'Error inserting data for technology ID ' . $selectedTechId . ': ' . mysqli_error($con) . '<br>';
+                 }
+                 header("Refresh:0");
+            }
+        }
+    }
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -79,34 +110,41 @@
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
                 <div id="content">
-                    <form method="post">
-                        <?php
-                        $con = openConnection();
-                        $strSql = "SELECT * FROM technologies where event_id = '$event_id'";
-                        $result = getRecord($con, $strSql);
-
-                        foreach ($result as $key => $value) {
-                            echo '<label>';
-                            echo '<input type="checkbox" name="technology[]" value="' . $value['technology_id'] . '"> ' . $value['technology_name'];
-                            echo '</label>';
-
-                            // Query the product_technology_lines table for data related to the current technology_id
-                            $techId = $value['technology_id'];
-                            $dropdownSql = "SELECT * FROM product_technology_lines WHERE technology_id = '$techId'";
-                            $dropdownResult = getRecord($con, $dropdownSql);
-
-                            // Create the dropdown menu
-                            echo '<select class="tech-dropdown" name="dropdown_' . $techId . '">';
-                            echo '<option value="">Select a line</option>'; // Optional initial option
-                            foreach ($dropdownResult as $dropdownKey => $dropdownValue) {
-                                echo '<option value="' . $dropdownValue['id'] . '">' . $dropdownValue['technology_line'] . '</option>';
-                            }
-                            echo '</select><br>';
+                    <?php
+                        if ($reqPersons['status'] == 1) {
+                            echo "You already answered the form";
                         }
-                        closeConnection($con);
-                        ?>
-                        <input type="submit" name="btnSubmit" value="Submit">
-                    </form>
+                        else{ ?>
+                            <form method="post">
+                                <?php
+                                $con = openConnection();
+                                $strSql = "SELECT * FROM technologies where event_id = '$event_id'";
+                                $result = getRecord($con, $strSql);
+
+                                foreach ($result as $key => $value) {
+                                    echo '<label>';
+                                    echo '<input type="checkbox" name="technology[]" value="' . $value['technology_id'] . '"> ' . $value['technology_name'];
+                                    echo '</label>';
+
+                                    // Query the product_technology_lines table for data related to the current technology_id
+                                    $techId = $value['technology_id'];
+                                    $dropdownSql = "SELECT * FROM product_technology_lines WHERE technology_id = '$techId'";
+                                    $dropdownResult = getRecord($con, $dropdownSql);
+
+                                    // Create the dropdown menu
+                                    echo '<select class="tech-dropdown" name="dropdown_' . $techId . '">';
+                                    echo '<option value="">Select a line</option>'; // Optional initial option
+                                    foreach ($dropdownResult as $dropdownKey => $dropdownValue) {
+                                        echo '<option value="' . $dropdownValue['technology_line'] . '-'.$dropdownValue['product_id'].'-'.$dropdownValue['technology_id'].'-'.$dropdownValue['session_id'].'">' . $dropdownValue['technology_line'] . '</option>';
+                                    }
+                                    echo '</select><br>';
+                                }
+                                ?>
+                                <input type="submit" name="btnSubmit" value="Submit">
+                            </form>
+                       <?php }
+                    ?>
+                
                 </div>
             <!-- Footer -->
             <footer class="sticky-footer bg-white">
@@ -168,4 +206,5 @@
             });
         });
     </script>
+
 
