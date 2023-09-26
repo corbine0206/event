@@ -75,7 +75,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 }
             }
 
-            echo "Event, sessions, technologies, products, and technology lines inserted into the database successfully.";
+            echo '<script type="text/javascript">
+                    swal({
+                        title: "Success",
+                        text: "Redirecting in 2 seconds.\nSuccessfully update event",
+                        icon: "success",
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(function() {
+                        window.location.href = "./event.php";
+                    });
+                </script>';
         } else {
             echo "Error inserting event: " . mysqli_error($connection);
         }

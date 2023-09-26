@@ -1,9 +1,9 @@
+<?php include'script.php'; ?>
 <?php
 session_start();
 include 'connection.php'; // Include your database connection script
 $connection = openConnection();
 $user_id = $_SESSION['user_id'];
-echo "user id" . $user_id;
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (isset($_POST['eventTitle'])) {
         $eventTitle = mysqli_real_escape_string($connection, $_POST['eventTitle']);
@@ -55,17 +55,47 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                         }
                                     }
                                 } else {
-                                    echo "Error inserting technology: " . mysqli_error($connection);
+                                    echo '<script type="text/javascript">
+                                    swal({
+                                        title: "Warning",
+                                        text: "Redirecting in 2 seconds.\failed to insert technology",
+                                        icon: "Warning",
+                                        timer: 2000,
+                                        showConfirmButton: false
+                                    }).then(function() {
+                                        window.location.href = "./event.php";
+                                    });
+                                </script>';
                                 }
                             }
                         }
                     } else {
-                        echo "Error inserting session: " . mysqli_error($connection);
+                        echo '<script type="text/javascript">
+                            swal({
+                                title: "Warning",
+                                text: "Redirecting in 2 seconds.\failed to insert session",
+                                icon: "Warning",
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(function() {
+                                window.location.href = "./event.php";
+                            });
+                        </script>';
                     }
                 }
             }
 
-            echo "Event, sessions, technologies, products, and technology lines inserted into the database successfully.";
+            echo '<script type="text/javascript">
+                    swal({
+                        title: "Success",
+                        text: "Redirecting in 2 seconds.\nSuccessfully add event",
+                        icon: "success",
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(function() {
+                        window.location.href = "./event.php";
+                    });
+                </script>';
         } else {
             echo "Error inserting event: " . mysqli_error($connection);
         }
