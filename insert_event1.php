@@ -19,9 +19,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $sessionTitle = mysqli_real_escape_string($connection, $sessionTitle);
                     $date = mysqli_real_escape_string($connection, $_POST['date'][$sessionIndex]);
                     $time = mysqli_real_escape_string($connection, $_POST['time'][$sessionIndex]);
+                    $time2 = mysqli_real_escape_string($connection, $_POST['time2'][$sessionIndex]);
 
                     // Insert the session into the event_sessions table with the event_id
-                    $sessionInsertSql = "INSERT INTO event_sessions (event_id, session_title, date1, time1) VALUES ('$event_id', '$sessionTitle', '$date', '$time')";
+                    $sessionInsertSql = "INSERT INTO event_sessions (event_id, session_title, date1, time1, time2) VALUES ('$event_id', '$sessionTitle', '$date', '$time','$time2')";
                     if (mysqli_query($connection, $sessionInsertSql)) {
                         $session_id = mysqli_insert_id($connection); // Get the session_id of the newly inserted session
 

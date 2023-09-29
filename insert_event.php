@@ -32,6 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                     $product = mysqli_real_escape_string($connection, $_POST['product'][$topicIndex][$subtopicIndex]);
                                     $date = mysqli_real_escape_string($connection, $_POST['date'][$topicIndex][$subtopicIndex]);
                                     $time = mysqli_real_escape_string($connection, $_POST['time'][$topicIndex][$subtopicIndex]);
+                                    $time2 = mysqli_real_escape_string($connection, $_POST['time2'][$topicIndex][$subtopicIndex]);
                                     $technologyLine = mysqli_real_escape_string($connection, $_POST['TechnologyLine'][$topicIndex][$subtopicIndex]);
 
                                     // Insert the subtopic into the subtopics table with additional fields

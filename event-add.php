@@ -49,11 +49,11 @@
                                 <div class="form-group">
                                     <label for="eventTitle">Event Title:</label>
                                     <input type="text" id="eventTitle" name="eventTitle" class="form-control" required>
-                                    <input type="text" name="user_id" value="<?php echo $user_id; ?>">
+                                    <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="csvFile">Select a CSV file:</label>
-                                    <input type="file" class="form-control-file" name="csvFile" id="csvFile" accept=".csv">
+                                    <input type="file" class="form-control-file" name="csvFile" id="csvFile" accept=".csv" required>
                                 </div>
                                  <div id="sessionContainer">
                         <!-- Sessions will be added here -->
@@ -120,7 +120,7 @@
                 <div class="row">
                     <div class="col-md-4">
                         <label for="session-${sessionIndex}">Session:</label>
-                        <input type="text" id="session-${sessionIndex}" class="form-control" name="session[]" required"> 
+                        <input type="text" id="session-${sessionIndex}" class="form-control" name="session[]" required="true"> 
                     </div>
                     <div class="col-md-4">
                         <label for="schedule-${sessionIndex}">Schedule:</label>
@@ -129,6 +129,21 @@
                             <select class="form-control time-select" name="time[]" required>
                                 <option value="06:00">06:00</option>
                                 <option value="07:00">07:00</option>
+                                <option value="08:00">08:00</option>
+                                <option value="09:00">09:00</option>
+                                <option value="10:00">10:00</option>
+                                <option value="11:00">11:00</option>
+                                <option value="12:00">12:00</option>
+                            </select>
+                            <select class="form-control time-select" name="time2[]" required>
+                                <option value="13:00">13:00</option>
+                                <option value="14:00">14:00</option>
+                                <option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option>
+                                <option value="17:00">17:00</option>
+                                <option value="18:00">18:00</option>
+                                <option value="19:00">19:00</option>
+                                <option value="20:00">20:00</option>
                             </select>
                         </div>
                     </div>

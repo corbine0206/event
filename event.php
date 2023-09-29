@@ -6,7 +6,7 @@
     // Function to get event session titles, dates, and times for a specific event
     function getEventSessionsInfo($connection, $event_id) {
         $sessionsInfo = array();
-        $sql = "SELECT session_title, date1, time1 FROM event_sessions WHERE event_id = '$event_id'";
+        $sql = "SELECT session_title, date1, time1, time2 FROM event_sessions WHERE event_id = '$event_id'";
         $result = mysqli_query($connection, $sql);
         if ($result) {
             while ($row = mysqli_fetch_assoc($result)) {
@@ -92,9 +92,10 @@
                                     <tbody>
                                         <?php
                                         $con = openConnection();
-                                        $strSql = "SELECT * FROM events where user_id = '$user_id' and event_status = 1";
+                                        $strSql = "SELECT * FROM events where user_id = '$user_id'";
                                         $result = getRecord($con, $strSql);
                                         foreach ($result as $key => $event) {
+                                            $event_status = $event['event_status'];
                                             echo 
                                             '<tr>
                                                 <td>' . ($key + 1) . '</td>
@@ -107,7 +108,8 @@
                                             foreach ($eventSessions as $session) {
                                                 echo '<strong>Title:</strong> ' . $session['session_title'] . '<br>';
                                                 echo '<strong>Date:</strong> ' . $session['date1'] . '<br>';
-                                                echo '<strong>Time:</strong> ' . $session['time1'] . '<br><br>';
+                                                echo '<strong>Time:</strong> ' . $session['time1'] . '<br>';
+                                                echo '<strong>Time2:</strong> ' . $session['time2'] . '<br><br>';
                                             }
                                             echo '</td>';
 
@@ -116,9 +118,20 @@
                                                 echo $techCount = getEventTechnologyLineCount($con, $event['event_id']);
 
                                             echo '</td>
-                                                <td>
+                                                <td>';
+                                                if ($event_status == '2') {
+                                                    echo '
+                                                    <button class="btn btn-danger btn-circle btnDeleteEvent" data-toggle="modal" data-target="#delete_event" event_id="'.$event['event_id'].'" disabled><i class="fas fa-trash"></i></button>
+                                                    <button class="btn btn-warning" disabled><i class="fas fa-edit"></i></button>
+                                                        ';
+                                                }
+                                                else{
+                                                    echo '
                                                     <button class="btn btn-danger btn-circle btnDeleteEvent" data-toggle="modal" data-target="#delete_event" event_id="'.$event['event_id'].'"><i class="fas fa-trash"></i></button>
-                                                    <a href="event-edit.php?eventID=' . $event['event_id'] . '" class="btn btn-warning"><i class="fas fa-edit"></i></a>
+                                                    <a href="event-edit.php?eventID=' . $event['event_id'] . '" class="btn btn-warning"><i class="fas fa-edit"></i></a>';
+
+                                                }
+                                            echo '
                                                 </td>
                                             </tr>';
                                         }
