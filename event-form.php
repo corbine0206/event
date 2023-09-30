@@ -3,7 +3,7 @@
     include 'connection.php';
     $event_id = isset($_GET['eventID']) ? $_GET['eventID'] : null;
     $email = isset($_GET['email']) ? $_GET['email'] : null;
-
+    
     try {
         if ($event_id !== null && $email !== null) {
             $connection = openConnection();
@@ -23,54 +23,111 @@
         echo 'Error: ' . $e->getMessage();
     }
     ?>
-    <?php
-    if (isset($_POST['btnSubmit'])) {
-        $connection = openConnection();
-        $email = $_GET['email'];
-        $updateSql = "UPDATE events set event_status = 2 where event_id = '$event_id'";
-        mysqli_query($connection, $updateSql);
-        $userUpdate = "UPDATE participants set status = 1 where event_id = '$event_id' and email = '$email'";
-        mysqli_query($connection, $userUpdate);
-        if (isset($_POST["technology"])) {
-            $selectedTechnologies = $_POST["technology"];
+<?php
+// Previous PHP code for form processing and data retrieval
 
-            foreach ($selectedTechnologies as $selectedTechId) {
-                $selectedDropdownValue = $_POST["dropdown_" . $selectedTechId];
-                $dataExplode = explode("-", $selectedDropdownValue);
-                $response = $dataExplode[0];
-                $product_id = $dataExplode[1];
-                $technology_id = $dataExplode[2];
-                $session_id = $dataExplode[3];
-                // Insert the selected technology_id and dropdown value into your database
-                 $insertSql = "INSERT INTO response (event_id, email, product_id, technology_id, session_id, response) VALUES ('$event_id','$email', '$product_id', '$technology_id', '$session_id', '$response')";
+if (isset($_POST['btnSubmit'])) {
+    // Get selected technology and product choices from the form
+    $email = $_GET['email'];
 
-                 if (mysqli_query($connection, $insertSql)) {
-                     echo 'Data inserted successfully for technology ID ' . $selectedTechId . '<br>';
-                 } else {
-                     echo 'Error inserting data for technology ID ' . $selectedTechId . ': ' . mysqli_error($con) . '<br>';
-                 }
-                 header("Refresh:0");
-            }
+    // Create an array to store selected product and technology data
+    $selected_data = [];
+
+    if (isset($_POST["technology"])) {
+        $selectedTechnologies = $_POST["technology"];
+
+        foreach ($selectedTechnologies as $selectedTechId) {
+            $selectedDropdownValue = $_POST["dropdown_" . $selectedTechId];
+            $dataExplode = explode("-", $selectedDropdownValue);
+            $response = $dataExplode[0];
+            $product_id = $dataExplode[1];
+            $technology_id = $dataExplode[2];
+            $session_id = $dataExplode[3];
+            // Insert the selected technology_id and dropdown value into your database
+             $insertSql = "INSERT INTO response (event_id, email, product_id, technology_id, session_id, response) VALUES ('$event_id','$email', '$product_id', '$technology_id', '$session_id', '$response')";
+
+             if (mysqli_query($connection, $insertSql)) {
+                 echo 'Data inserted successfully for technology ID ' . $selectedTechId . '<br>';
+             } else {
+                 echo 'Error inserting data for technology ID ' . $selectedTechId . ': ' . mysqli_error($con) . '<br>';
+             }
         }
     }
+    // Get selected technologies from the form
+    $selected_technologies = $_POST["technology"];
+
+    // Iterate through selected technologies
+    foreach ($selected_technologies as $tech_id) {
+        // Check if a dropdown menu associated with this technology is set
+        $dropdown_key = "dropdown_" . $tech_id;
+        if (isset($_POST[$dropdown_key])) {
+            // Add selected product and technology data to the array
+            $selectedDropdownValue = $_POST[$dropdown_key];
+            $dataExplode = explode("-", $selectedDropdownValue);
+            $response = $dataExplode[0];
+            $selected_data[] = $response;
+        }
+    }
+
+    // Prepare the selected data as a comma-separated string
+    $selected_data_str = implode(",", $selected_data);
+
+    // Run the Python script with the selected data as arguments
+    $output = shell_exec("recommendation.py \"$selected_data_str\"");
+    $recommended_sessions = json_decode($output, true);
+
+    if ($recommended_sessions) {
+        $updateSql = "UPDATE events SET event_status = 2 WHERE event_id = '$event_id'";
+        mysqli_query($connection, $updateSql);
+        $userUpdate = "UPDATE participants SET status = 1 WHERE event_id = '$event_id' AND email = '$email'";
+        mysqli_query($connection, $userUpdate);
+
+        // Build and send an email with recommended sessions
+        $email_subject = "Recommended Sessions";
+        $email_message = "<html><body>";
+        $email_message .= "<h2>Recommended Sessions</h2>";
+        $email_message .= "<ul>";
+
+        $uniqueSessionIds = [];
+
+        foreach ($recommended_sessions as $session) {
+            $sessionId = $session[0];
+
+            if (!in_array($sessionId, $uniqueSessionIds)) {
+                echo $email_message .= "<li>Session Name: " . $session[4] . "</li>";
+                $email_message .= "<li>Date: " . $session[1] . "</li>";
+                $email_message .= "<li>Time: " . $session[2] . "</li>";
+                $email_message .= "<li>Technology: " . $session[6] . "</li>";
+
+                // Add the session ID to the uniqueSessionIds array
+                $uniqueSessionIds[] = $sessionId;
+            }
+        }
+
+        $email_message .= "</ul>";
+        $email_message .= "</body></html>";
+
+        // Set recipient email address
+        $to = $email; // Replace with the recipient's email address
+
+        // Set email headers
+        $headers = "MIME-Version: 1.0" . "\r\n";
+        $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+        $headers .= 'From: your_email@gmail.com' . "\r\n"; // Replace with your email address
+
+        // Send the email
+        mail($to, $email_subject, $email_message, $headers);
+    } else {
+        echo "No recommended sessions.";
+    }
+    
+    // Add any additional code or redirects as needed after processing
+}
 ?>
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <title>Event</title>
 
 
-    <?php include'link.php'; ?>
 
-</head>
-    <style>
+<style>
         /* Center the container */
         body {
             display: flex;
@@ -172,9 +229,7 @@
     <?php include'script.php'; ?>
 
 </body>
-</html>
-
-   <script>
+<script>
         document.addEventListener("DOMContentLoaded", function () {
             var checkboxes = document.querySelectorAll('input[type="checkbox"]');
             var maxChecked = 3; // Set the maximum number of checkboxes allowed
@@ -206,5 +261,4 @@
             });
         });
     </script>
-
 

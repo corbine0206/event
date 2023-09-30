@@ -7,7 +7,7 @@ $user_id = $_SESSION['user_id'];
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (isset($_POST['eventTitle'])) {
         $eventTitle = mysqli_real_escape_string($connection, $_POST['eventTitle']);
-
+        $user_id = $_POST['user_id'];
         // Insert the event title into the events table
         $eventInsertSql = "INSERT INTO events (event_title, user_id, event_status) VALUES ('$eventTitle', '$user_id', 1)";
         echo $eventInsertSql;

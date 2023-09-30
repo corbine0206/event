@@ -92,7 +92,7 @@
                                     <tbody>
                                         <?php
                                         $con = openConnection();
-                                        $strSql = "SELECT * FROM events where user_id = '$user_id'";
+                                        $strSql = "SELECT * FROM events where user_id = '$user_id' order by event_id desc";
                                         $result = getRecord($con, $strSql);
                                         foreach ($result as $key => $event) {
                                             $event_status = $event['event_status'];
