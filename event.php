@@ -123,12 +123,14 @@
                                                     echo '
                                                     <button class="btn btn-danger btn-circle btnDeleteEvent" data-toggle="modal" data-target="#delete_event" event_id="'.$event['event_id'].'" disabled><i class="fas fa-trash"></i></button>
                                                     <button class="btn btn-warning" disabled><i class="fas fa-edit"></i></button>
+                                                    <a href="event-session.php?eventID=' . $event['event_id'] . '" class="btn btn-primary"><i class="fas fa-eye"></i></a>
                                                         ';
                                                 }
                                                 else{
                                                     echo '
                                                     <button class="btn btn-danger btn-circle btnDeleteEvent" data-toggle="modal" data-target="#delete_event" event_id="'.$event['event_id'].'"><i class="fas fa-trash"></i></button>
-                                                    <a href="event-edit.php?eventID=' . $event['event_id'] . '" class="btn btn-warning"><i class="fas fa-edit"></i></a>';
+                                                    <a href="event-edit.php?eventID=' . $event['event_id'] . '" class="btn btn-warning"><i class="fas fa-edit"></i></a>
+                                                    <a href="event-session.php?eventID=' . $event['event_id'] . '" class="btn btn-primary"><i class="fas fa-eye"></i></a>';
 
                                                 }
                                             echo '

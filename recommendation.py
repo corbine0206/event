@@ -24,7 +24,7 @@ cursor.execute("""
     SELECT DISTINCT es.session_id, es.date1, es.time1, es.time2, es.session_title, es.event_id, p.technology_line, p.product_id
     FROM event_sessions AS es
     JOIN product_technology_lines AS p ON es.session_id = p.session_id
-    WHERE p.technology_line IN (%s, %s, %s)
+    WHERE p.technology_line IN ("tech line 1", "tech line 1", "tech line 1")
     AND NOT EXISTS (
         SELECT 1
         FROM event_sessions AS s
@@ -45,7 +45,7 @@ if not recommended_sessions:
         SELECT DISTINCT es.session_id, es.date1, es.time1, es.time2, es.session_title, es.event_id, p.technology_line, p.product_id
         FROM event_sessions AS es
         JOIN product_technology_lines AS p ON es.session_id = p.session_id
-        WHERE p.technology_line IN (%s, %s, %s)
+        WHERE p.technology_line IN ("tech line 1", "tech line 1", "tech line 1")
 
     """, selected_data)  # Pass the tuple directly
 
