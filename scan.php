@@ -48,10 +48,15 @@
                             <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-fw fa-calendar"></i>Event</h6>
                         </div>
                         <div class="card-body">
-                            <h1>QR Code Scanner</h1>
-                            <video id="qr-video" width="400" height="300" autoplay playsinline></video>
+                        <h1>QR Code Scanner</h1>
+                        <video id="qr-video" width="400" height="300" autoplay playsinline></video>
+                        <form id="qr-form" method="post" action="process_qr.php">
+                            <input type="hidden" name="event_id" value="<?php echo $_GET['eventID']; ?>">
+                            <input type="hidden" name="session_id" value="<?php echo $_GET['session_id']; ?>">
+                            <input class="form-control" id="scanned-data" type="text" name="scanned_data" placeholder="Scanned Data" readonly>
                             <div id="qr-result"></div>
-                            <script src="scanner.js"></script>
+                        </form>
+                        <script src="scanner.js"></script>
                         </div>
                     </div>
 
@@ -60,39 +65,30 @@
             </div>
             <!-- End of Main Content -->
 <script>
-    const video = document.getElementById('qr-video');
-    const qrResult = document.getElementById('qr-result');
+const video = document.getElementById('qr-video');
+const qrResult = document.getElementById('qr-result');
+const scannedDataInput = document.getElementById('scanned-data'); // Input field to display scanned data
 
-    const scanner = new Instascan.Scanner({ video: video });
-    scanner.addListener('scan', function (content) {
-        qrResult.innerText = content;
+const scanner = new Instascan.Scanner({ video: video });
+scanner.addListener('scan', function (content) {
+    qrResult.innerText = content;
 
-        // Send scanned data to PHP for processing
-        fetch('process_qr.php', {
-            method: 'POST',
-            body: JSON.stringify({ data: content }),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.text())
-        .then(responseText => {
-            console.log('Response from PHP:', responseText);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    });
+    // Update the input field with scanned data
+    scannedDataInput.value = content;
 
-    Instascan.Camera.getCameras().then(function (cameras) {
-        if (cameras.length > 0) {
-            scanner.start(cameras[0]);
-        } else {
-            console.error('No cameras found.');
-        }
-    }).catch(function (err) {
-        console.error('Error accessing the camera:', err);
-    });
+    // Submit the form automatically
+    document.forms[0].submit(); // Assuming it's the first form on the page
+});
+
+Instascan.Camera.getCameras().then(function (cameras) {
+    if (cameras.length > 0) {
+        scanner.start(cameras[0]);
+    } else {
+        console.error('No cameras found.');
+    }
+}).catch(function (err) {
+    console.error('Error accessing the camera:', err);
+});
 
 </script>
 
