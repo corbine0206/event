@@ -49,6 +49,11 @@
                         </div>
                         <div class="card-body">
                         <h1>QR Code Scanner</h1>
+                        <?php
+                            if (isset($_GET['success']) && $_GET['success'] == 1) {
+                                echo '<p>Successfully Attended! <b>'. $_GET['email'] .'</b> </p>';
+                            }
+                        ?>
                         <video id="qr-video" width="400" height="300" autoplay playsinline></video>
                         <form id="qr-form" method="post" action="process_qr.php">
                             <input type="hidden" name="event_id" value="<?php echo $_GET['eventID']; ?>">

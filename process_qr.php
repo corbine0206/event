@@ -17,7 +17,7 @@
                     VALUES ('$event_id', '$session_id', '$scannedData', '$dateIn', '$timeIn')";
 
         if ($connection->query($sqlInsert) === TRUE) {
-            header("location: scan.php?eventID=$event_id&session_id=$session_id");
+            header("location: scan.php?eventID=$event_id&session_id=$session_id&success=1&email=$scannedData");
         } else {
             echo "Error: " . $sqlInsert . "<br>" . $conn->error;
         }
