@@ -9,12 +9,13 @@ def load_json_file(json_file):
         raise ValueError(f"Error loading JSON file: {e}")
 
 def recommend_sessions(user_preferences, dataset):
-    selected_technology_lines = user_preferences.get('technology_line', '').split(',')
+    selected_technology_line = user_preferences.get('technology_line', '')
+    selected_data = user_preferences.get('selected_data', '').split(',')
 
     recommended_sessions = []
 
     for entry in dataset:
-        if entry.get('technology_line', '') in selected_technology_lines:
+        if entry.get('technology_line', '') == selected_technology_line and any(data in entry.get('technology_name', '') for data in selected_data):
             recommended_sessions.append({
                 'session_id': entry.get('session_id', ''),
                 'technology_line': entry.get('technology_line', ''),

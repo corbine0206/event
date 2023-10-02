@@ -57,7 +57,7 @@ if (isset($_POST['btnSubmit'])) {
     
     // Capture the output of the Python script
     $output = shell_exec($command);
-    
+    echo "<p>'$output'</p>";
     // You can also convert the JSON data to a PHP array or object and work with it as needed
     $dataFromPython = json_decode($output, true);
     
