@@ -39,21 +39,21 @@
                 <div class="container-fluid">
                 <?php
 
-// Text you want to encode as a QR code
-$textToEncode = "Hello, World!";
+                // Text you want to encode as a QR code
+                $textToEncode = "Hello, World!";
 
-// Output file name (where the QR code will be saved)
-$outputFileName = "qrcode.png";
+                // Output file name (where the QR code will be saved)
+                $outputFileName = "qrcode.png";
 
-// Generate the QR code
-QRcode::png($textToEncode, $outputFileName, QR_ECLEVEL_L, 3);
+                // Generate the QR code
+                QRcode::png($textToEncode, $outputFileName, QR_ECLEVEL_L, 3);
 
-// Display a message with a link to download or view the QR code
-echo "QR code generated. <a href='$outputFileName' download>Download QR Code</a>";
+                // Display a message with a link to download or view the QR code
+                echo "QR code generated. <a href='$outputFileName' download>Download QR Code</a>";
 
-// Optionally, you can display the QR code image
-echo "<img src='$outputFileName' alt='QR Code'>";
-?>
+                // Optionally, you can display the QR code image
+                echo "<img src='$outputFileName' alt='QR Code'>";
+                ?>
 
                 </div>
 

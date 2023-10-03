@@ -22,27 +22,33 @@
     } catch (Exception $e) {
         echo 'Error: ' . $e->getMessage();
     }
-    ?>
+?>
 
 <?php
 if (isset($_POST['btnSubmit'])) {
-    // Get selected technology and product choices from the form
-    $email = $_GET['email'];
+    // Establish a database connection if needed
+    $connection = openConnection();
 
-    // Create an array to store selected product and technology data
-    $selected_data = [];
-
-    $event_id = $_GET['eventID'];
-    $datasetSql = "SELECT * FROM `product_technology_lines` as pt 
-    join event_sessions as es on es.event_id = pt.event_id 
-    join technologies as t on es.event_id = t.event_id 
-    where pt.event_id = '$event_id'
-    ";
-    $dataset = getRecord($connection, $datasetSql);
+    // Retrieve the dataset
+    $datasetSql = "SELECT technology_line, es.session_title ,pt.session_id, t.technology_name, es.date1, es.time1, es.time2
+    FROM product_technology_lines as pt 
+    join technologies as t on pt.technology_id = t.technology_id 
+    join event_sessions as es on es.session_id = pt.session_id where pt.event_id = '$event_id'";
     
+    // Execute the SQL query and fetch the data
+    $result = mysqli_query($connection, $datasetSql);
+    
+    // Initialize an array to store dataset entries
+    $dataset = array();
+
+    // Fetch rows and add them to the dataset array
+    while ($row = mysqli_fetch_assoc($result)) {
+        $dataset[] = $row;
+    }
+
     // Get selected technologies from the form
     $selected_technologies = $_POST["technology"];
-    
+    $selected_data = [];
     // Iterate through selected technologies
     foreach ($selected_technologies as $tech_id) {
         // Check if a dropdown menu associated with this technology is set
@@ -55,59 +61,48 @@ if (isset($_POST['btnSubmit'])) {
             $selected_data[] = $response;
         }
     }
-    
-    // Prepare the selected data as a comma-separated string
-    $selected_data_str = implode(",", $selected_data);
-    
-    $user_preferences = array(
-        "selected_data" => $selected_data_str
+    // Combine the data into an associative array
+    $dataToPass = array(
+        "user_preferences" => $selected_data,
+        "dataset" => $dataset
     );
 
-    // Combine both datasets into an associative array
-    $data_to_send = array(
-        "dataset" => $dataset,
-        "user_preferences" => $user_preferences
-    );
-    
-    // Convert the array to JSON
-    $data_json = json_encode($data_to_send);
-    
-    // Create a temporary JSON file and write the data to it
-    $tempJsonFile = tempnam(sys_get_temp_dir(), 'event_data_');
-    file_put_contents($tempJsonFile, $data_json);
-    
-    $pythonScript = 'new-recommendation.py';
-    
-    // Pass the temporary JSON file path as an argument
-    $escapedJsonFilePath = escapeshellarg($tempJsonFile);
-    $command = "$pythonScript $escapedJsonFilePath";
-    $output = shell_exec($command);
-    
-    // Check if valid JSON data was returned
-    $dataFromPython = json_decode($output, true);
+    // Encode the data as JSON
+    $jsonData = json_encode($dataToPass);
+    // Create a temporary file to store the JSON data
+    $tempFile = tempnam(sys_get_temp_dir(), 'json_data');
+    file_put_contents($tempFile, $jsonData);
 
-    if ($dataFromPython !== null && is_array($dataFromPython) && isset($dataFromPython['recommended_sessions'])) {
-        // Valid data received, proceed to display recommended sessions
-        $recommendedSessions = $dataFromPython['recommended_sessions'];
-        foreach ($recommendedSessions as $session) {
-            // Display session details as needed
-            echo "Session ID: " . $session['session_id'] . "<br>";
-            echo "Technology Line: " . $session['technology_line'] . "<br>";
-            echo "Product ID: " . $session['product_id'] . "<br>";
-            // Add more session details as needed
+    // Use escapeshellarg to properly escape the file path for the command line
+    $fileArg = escapeshellarg($tempFile);
+
+    // Call your Python script with the file path as an argument
+    $command = "python new-recommendation.py $fileArg";
+    exec($command, $output, $returnCode);
+
+    // Remove the temporary file
+    unlink($tempFile);
+
+    // Process the output or print it for debugging
+    echo implode("\n", $output);
+
+    if ($returnCode === 0) {
+        // The Python script executed successfully
+        echo "Python script output:<br>";
+        foreach ($output as $line) {
+            echo $line . "<br>";
         }
     } else {
-        // Handle the case where valid data was not received
-        echo "Error: Invalid or no data received from Python script.";
+        // There was an error executing the Python script
+        echo "Error executing Python script. Return code: $returnCode";
     }
-    
-    // Clean up the temporary JSON file
-    unlink($tempJsonFile);
+
+    // Enable PHP error reporting for debugging
+    ini_set('display_errors', 1);
+    error_reporting(E_ALL);
 }
+
 ?>
-
-
-
 
 
 <style>
@@ -155,8 +150,9 @@ if (isset($_POST['btnSubmit'])) {
                             echo "You already answered the form";
                         }
                         else{ ?>
-                            <form method="post" action="process-form.php">
+                            <form method="post">
                                 <input type="text" value="<?php echo $_GET['eventID'] ?>" name="event_id"> <!-- Replace "process-form.php" with your PHP script's filename -->
+                                <input type="text" value="<?php echo $_GET['email'] ?>" name="email">
                                 <?php
                                 $con = openConnection();
                                 $strSql = "SELECT * FROM technologies where event_id = '$event_id'";
@@ -245,4 +241,3 @@ if (isset($_POST['btnSubmit'])) {
             });
         });
     </script>
-
