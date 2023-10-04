@@ -29,6 +29,36 @@ if (isset($_POST['btnSubmit'])) {
     // Establish a database connection if needed
     $connection = openConnection();
 
+    $email = $_GET['email'];
+    $event_id = $_GET['eventID'];
+    $updateParticipantSql = "UPDATE participants set status = 1 where event_id = '$event_id' and email = '$email'";
+    if (mysqli_query($connection, $updateParticipantSql)) {
+        echo 'Successfully update participants';
+    }
+    $updateEventSql = "UPDATE events set event_status = 2 where event_id = '$event_id'";
+    if (mysqli_query($connection, $updateEventSql)) {
+        echo "successfully event updated to 2";
+    }
+    if (isset($_POST["technology"])) {
+        $selectedTechnologies = $_POST["technology"];
+
+        foreach ($selectedTechnologies as $selectedTechId) {
+            $selectedDropdownValue = $_POST["dropdown_" . $selectedTechId];
+            $dataExplode = explode("-", $selectedDropdownValue);
+            $response = $dataExplode[0];
+            $product_id = $dataExplode[1];
+            $technology_id = $dataExplode[2];
+            $session_id = $dataExplode[3];
+            // Insert the selected technology_id and dropdown value into your database
+             $insertSql = "INSERT INTO response (event_id, email, product_id, technology_id, session_id, response) VALUES ('$event_id','$email', '$product_id', '$technology_id', '$session_id', '$response')";
+
+             if (mysqli_query($connection, $insertSql)) {
+                 echo 'Data inserted successfully for technology ID ' . $selectedTechId . '<br>';
+             } else {
+                 echo 'Error inserting data for technology ID ' . $selectedTechId . ': ' . mysqli_error($con) . '<br>';
+             }
+        }
+    }
     // Retrieve the dataset
     $datasetSql = "SELECT technology_line, es.session_title ,pt.session_id, t.technology_name, es.date1, es.time1, es.time2
     FROM product_technology_lines as pt 
@@ -91,25 +121,44 @@ if (isset($_POST['btnSubmit'])) {
             // Parse the JSON data sent by the Python script
             $json_data = json_decode($line, true);
     
+            $previous_session_id = null; // Initialize a variable to keep track of the previous session_id
+            $printed_session_ids = []; // Initialize an array to keep track of session_ids that have been printed
+
             if ($json_data) {
                 foreach ($json_data as $result) {
-                    if (isset($result['Session ID'])) {
-                        $session_title = $result['Session ID'];
-                        echo "Session Title: $session_title<br>";
-                    } else {
-                        echo 'Session Title not found in JSON data<br>';
+                    $session_title = $result['Session Title'];
+                    $session_id = $result['Session ID'];
+                    $date1 = $result['Date1'];
+                    $time1 = $result['Time1'];
+                    $time2 = $result['Time2'];
+                    
+                    // Check if the current session_id is different from the previous one
+                    if ($session_id !== $previous_session_id) {
+                        // Check if the current session_id has not been printed before
+                        if (!in_array($session_id, $printed_session_ids)) {
+                            $sqlInsertRecommend = "INSERT INTO recommendation (event_id, session_id, email) VALUES('$event_id', '$session_id', '$email')";
+                            if (mysqli_query($connection, $sqlInsertRecommend)) {
+                                echo "successful insert session_id". $session_id;
+                            }
+                            else{
+                                echo "failed to insert";
+                            }
+                            // Add the current session_id to the printed_session_ids array
+                            $printed_session_ids[] = $session_id;
+                        }
                     }
+                    // Update the previous session_id
+                    $previous_session_id = $session_id;
                 }
             } else {
                 echo 'Invalid JSON data received from Python<br>';
             }
-            
         }
     } else {
         // There was an error executing the Python script
         echo "Error executing Python script. Return code: $returnCode";
     }
-    
+    header("Refresh:0");
     
 
     // Enable PHP error reporting for debugging
