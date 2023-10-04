@@ -84,18 +84,33 @@ if (isset($_POST['btnSubmit'])) {
     unlink($tempFile);
 
     // Process the output or print it for debugging
-    echo implode("\n", $output);
 
     if ($returnCode === 0) {
         // The Python script executed successfully
-        echo "Python script output:<br>";
         foreach ($output as $line) {
-            echo $line . "<br>";
+            // Parse the JSON data sent by the Python script
+            $json_data = json_decode($line, true);
+    
+            if ($json_data) {
+                foreach ($json_data as $result) {
+                    if (isset($result['Session ID'])) {
+                        $session_title = $result['Session ID'];
+                        echo "Session Title: $session_title<br>";
+                    } else {
+                        echo 'Session Title not found in JSON data<br>';
+                    }
+                }
+            } else {
+                echo 'Invalid JSON data received from Python<br>';
+            }
+            
         }
     } else {
         // There was an error executing the Python script
         echo "Error executing Python script. Return code: $returnCode";
     }
+    
+    
 
     // Enable PHP error reporting for debugging
     ini_set('display_errors', 1);

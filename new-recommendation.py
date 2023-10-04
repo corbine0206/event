@@ -48,18 +48,30 @@ try:
     # Find the technology line index with the highest similarity for each user preference
     best_matches = np.argmax(user_preference_scores, axis=1)
 
-    # Print the best matches with session_title, date1, time1, and time2
+    # Create a list to store the results
+    results = []
+
+    # Prepare and store the results
     for i, preference in enumerate(user_preferences):
         best_match_index = best_matches[i]
         best_match_entry = dataset[best_match_index]
-        print(f"User Preference: {preference}")
-        print(f"Best Match Technology Line: {best_match_entry.get('technology_line', '')}")
-        print(f"Session Title: {best_match_entry.get('session_title', '')}")
-        print(f"Date1: {best_match_entry.get('date1', '')}")
-        print(f"Time1: {best_match_entry.get('time1', '')}")
-        print(f"Time2: {best_match_entry.get('time2', '')}")
-        print(f"Cosine Similarity Score: {user_preference_scores[i, best_match_index]}")
-        print("\n")
+        result = {
+            "User Preference": preference,
+            "Best Match Technology Line": best_match_entry.get("technology_line", ""),
+            "Session ID": best_match_entry.get("session_id", ""),
+            "Session Title": best_match_entry.get("session_title", ""),  # Include session_title field
+            "Date1": best_match_entry.get("date1", ""),
+            "Time1": best_match_entry.get("time1", ""),
+            "Time2": best_match_entry.get("time2", ""),
+            "Cosine Similarity Score": user_preference_scores[i, best_match_index],
+        }
+        results.append(result)
+
+    # Convert the results to JSON format
+    results_json = json.dumps(results)
+
+    # Print the JSON results
+    print(results_json)
 
 except Exception as e:
     print("Error:", str(e))
