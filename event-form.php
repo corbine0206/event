@@ -1,6 +1,11 @@
 <?php
     session_start();
     include 'connection.php';
+    include 'phpqrcode\phpqrcode\qrlib.php';
+    require 'vendor/autoload.php'; // Include Composer's autoloader
+
+    use PHPMailer\PHPMailer\PHPMailer;
+    use PHPMailer\PHPMailer\Exception;
     $event_id = isset($_GET['eventID']) ? $_GET['eventID'] : null;
     $email = isset($_GET['email']) ? $_GET['email'] : null;
     
@@ -117,16 +122,19 @@ if (isset($_POST['btnSubmit'])) {
     // Remove the temporary file
     unlink($tempFile);
 
-    // Process the output or print it for debugging
-
+    $outputFileName = "$email.png";
+    $textToEncode = $email;
+    // Generate the QR code
+    QRcode::png($textToEncode, $outputFileName, QR_ECLEVEL_L, 3);
     if ($returnCode === 0) {
         // The Python script executed successfully
+        $emailContent = '<h1>Session Information:</h1><br>'; // Initialize email content
+        $previous_session_id = null; // Initialize a variable to keep track of the previous session_id
+        $printed_session_ids = []; // Initialize an array to keep track of session_ids that have been printed
+
         foreach ($output as $line) {
             // Parse the JSON data sent by the Python script
             $json_data = json_decode($line, true);
-    
-            $previous_session_id = null; // Initialize a variable to keep track of the previous session_id
-            $printed_session_ids = []; // Initialize an array to keep track of session_ids that have been printed
 
             if ($json_data) {
                 foreach ($json_data as $result) {
@@ -135,18 +143,19 @@ if (isset($_POST['btnSubmit'])) {
                     $date1 = $result['Date1'];
                     $time1 = $result['Time1'];
                     $time2 = $result['Time2'];
-                    
+
                     // Check if the current session_id is different from the previous one
                     if ($session_id !== $previous_session_id) {
                         // Check if the current session_id has not been printed before
                         if (!in_array($session_id, $printed_session_ids)) {
-                            $sqlInsertRecommend = "INSERT INTO recommendation (event_id, session_id, email) VALUES('$event_id', '$session_id', '$email')";
-                            if (mysqli_query($connection, $sqlInsertRecommend)) {
-                                echo "successful insert session_id". $session_id;
-                            }
-                            else{
-                                echo "failed to insert";
-                            }
+                            // Add session information to the email content
+                            $emailContent .= "<p>Session Title: $session_title</p>";
+                            $emailContent .= "<p>Session ID: $session_id</p>";
+                            $emailContent .= "<p>Date: $date1</p>";
+                            $emailContent .= "<p>Time Morning: $time1</p>";
+                            $emailContent .= "<p>Time Aftermoon: $time2</p>";
+                            $emailContent .= "<hr>";
+
                             // Add the current session_id to the printed_session_ids array
                             $printed_session_ids[] = $session_id;
                         }
@@ -158,18 +167,43 @@ if (isset($_POST['btnSubmit'])) {
                 echo 'Invalid JSON data received from Python<br>';
             }
         }
+
+        $mail = new PHPMailer(true);
+        // SMTP settings (you may need to configure these)
+        $mail->isSMTP();
+        $mail->Host = 'mail.laundryandwash.com';
+        $mail->SMTPSecure = 'tls'; // Use 'tls' for TLS encryption
+        $mail->SMTPAuth = true;
+        $mail->Username = 'event@laundryandwash.com';
+        $mail->Password = 'GhZ%3SiW]x=Z';
+        $mail->Port = 587; // Change to your SMTP port
+
+        // Set the "From" address correctly
+        $mail->setFrom('event@laundryandwash.com', 'Event Organizer');
+
+        $mail->addAddress($email); // Recipient's email address
+        $mail->isHTML(true);
+        $mail->Subject = "SESSION RECOMMENDED";
+
+        // Add the QR code image as an attachment
+        $mail->addAttachment($outputFileName);
+
+        // Embed the QR code image in the email body
+        $emailContent .= '<br><img src="cid:' . $outputFileName . '">';
+        $mail->Body = $emailContent;
+
+        // Send the email
+        if ($mail->send()) {
+            echo "Email sent successfully.";
+        } else {
+            echo "Email sending failed: " . $mail->ErrorInfo;
+        }
     } else {
         // There was an error executing the Python script
         echo "Error executing Python script. Return code: $returnCode";
     }
     header("Refresh:0");
-    
-
-    // Enable PHP error reporting for debugging
-    ini_set('display_errors', 1);
-    error_reporting(E_ALL);
 }
-
 ?>
 
 

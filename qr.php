@@ -1,5 +1,5 @@
 <?php
-    require_once 'phpqrcode\phpqrcode\qrlib.php';
+    include 'phpqrcode\phpqrcode\qrlib.php';
 ?>
 <html lang="en">
 

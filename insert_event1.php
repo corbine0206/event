@@ -2,6 +2,10 @@
 <?php
 session_start();
 include 'connection.php'; // Include your database connection script
+include 'phpqrcode\phpqrcode\qrlib.php';
+require 'vendor/autoload.php'; // Include Composer's autoloader
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 $connection = openConnection();
 $user_id = $_SESSION['user_id'];
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -94,7 +98,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         timer: 2000,
                         showConfirmButton: false
                     }).then(function() {
-                        window.location.href = "./event.php";
+                        
                     });
                 </script>';
         } else {
@@ -145,16 +149,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         // Split the concatenated values into an array
         $data = explode(',', $firstColumnValues);
+        $mail = new PHPMailer(true);
+        // SMTP settings (you may need to configure these)
+        $mail->isSMTP();
+        $mail->Host = 'mail.laundryandwash.com';
+        $mail->SMTPSecure = 'tls'; // Use 'tls' for TLS encryption
+        $mail->SMTPAuth = true;
+        $mail->Username = 'event@laundryandwash.com';
+        $mail->Password = 'GhZ%3SiW]x=Z';
+        $mail->Port = 587; // Change to your SMTP port
+        // Set the "From" address correctly
+        $mail->setFrom('event@laundryandwash.com', 'New Event');
 
         foreach ($data as $value) {
-            $to = $value;
-            $subject = 'the subject';
-            $message = '<a href="http://localhost/event/event-add.php?eventID='.$event_id.'&email='.$to.'">Click here to access the event</a>';
-            $headers = "From: webmaster@example.com\r\n";
-            $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+            $emailContent = '<a href="http://localhost/event/event-form.php?eventID='.$event_id.'&email='.$value.'">Click here to access the event</a>';
+            $mail->addAddress($value); // Recipient's email address
+            $mail->isHTML(true);
+            $mail->Subject = "NEW EVENT";
+            $mail->Body = $emailContent;
 
-            if (mail($to, $subject, $message, $headers)) {
-                echo 'Email sent to ' . $to . '<br>';
+            if ($mail->send()) {
+                echo 'Email sent to ' . $value . '<br>';
                 
                 // Assuming you have established a valid database connection
                 $participantsSql = "INSERT INTO participants(event_id, email, status) VALUES('$event_id', '$value', 0)";

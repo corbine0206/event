@@ -4,10 +4,6 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 set_time_limit(60); // Increase the time limit to 60 seconds (adjust as needed)
 
-// Set SMTP configuration using ini_set()
-ini_set("SMTP", "mail.laundryandwash.com");
-ini_set("smtp_port", "465"); // Use the correct SMTP port (465) from your cPanel
-
 // Email parameters
 $to = "corbine.santos0206@gmail.com";
 $subject = "Test Email";
@@ -20,20 +16,29 @@ $from = "event@laundryandwash.com"; // Use a valid email address from your domai
 $username = "event@laundryandwash.com"; // Use your actual email address from cPanel
 $password = "GhZ%3SiW]x=Z"; // Use your cPanel password
 
-// Additional headers
-$headers = "From: $from\r\n";
-$headers .= "Reply-To: $from\r\n";
-$headers .= "X-Mailer: PHP/" . phpversion();
+// Use PHPMailer
+require 'vendor/autoload.php'; // Include Composer's autoloader
 
-// Enable SSL/TLS encryption
-ini_set("smtp_ssl", "tls");
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-// Send the email
-if (mail($to, $subject, $message, $headers, "-f $from")) {
+$mail = new PHPMailer(true);
+$mail->isSMTP();
+$mail->Host = 'mail.laundryandwash.com';
+$mail->Port = 587; // Use the correct SMTP port for TLS
+$mail->SMTPSecure = 'tls'; // Use 'tls' for TLS encryption
+$mail->SMTPAuth = true;
+$mail->Username = $username;
+$mail->Password = $password;
+$mail->setFrom($from);
+$mail->addAddress($to);
+$mail->Subject = $subject;
+$mail->msgHTML($message);
+
+try {
+    $mail->send();
     echo "Email sent successfully.";
-} else {
-    echo "Email sending failed.";
+} catch (Exception $e) {
+    echo "Email sending failed. Error: " . $mail->ErrorInfo;
 }
-
-
 ?>

@@ -2,7 +2,7 @@
     session_start();
     include 'connection.php';
     $user_id = $_SESSION['user_id'];
-    require_once 'lib/QrReader.php';
+    include 'lib/QrReader.php';
 
 ?>
 <!DOCTYPE html>
