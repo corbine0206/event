@@ -1,6 +1,7 @@
 <?php
     session_start();
     include 'connection.php';
+    date_default_timezone_set('Asia/Manila');
     $user_id = $_SESSION['user_id'];
 
     // Function to get event session titles, dates, and times for a specific event
@@ -28,6 +29,26 @@
         }
         return $techlineCount;
     }
+    function getLastHighestDateTime($connection, $event_id) {
+        $sql = "SELECT date1, time2 FROM event_sessions where event_id = '$event_id'  ORDER BY CONCAT(date1, ' ', time2) DESC LIMIT 1";
+        $result = mysqli_query($connection, $sql);
+        if ($result) {
+            if (mysqli_num_rows($result) > 0) {
+                $row = mysqli_fetch_assoc($result);
+                $lastHighestDateTime = $row['date1'] . ' ' . $row['time2'];
+            }
+            else{
+                $lastHighestDateTime = "No records found";   
+            }
+            mysqli_free_result($result);
+        }
+        else{
+            $lastHighestDateTime = "Error: " . mysqli_error($conn);
+        }
+        return $lastHighestDateTime;
+
+
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -43,6 +64,7 @@
 
 
     <?php include'link.php'; ?>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'>            
 
 </head>
 
@@ -87,6 +109,7 @@
                                             <th>Session</th>
                                             <th>Technology</th>
                                             <th>Action</th>
+                                            <th>Date andt time highest</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -135,6 +158,18 @@
                                                 }
                                             echo '
                                                 </td>
+                                                <td>';
+                                                $lastHighestDateTime = getLastHighestDateTime($con, $event['event_id']);
+                                                $dateToday = date('Y-m-d h:i:s');
+                                                if($lastHighestDateTime < $dateToday){
+                                                    echo '<a href="send-email-event-done.php?eventID=' . $event['event_id'] . '" class="btn btn-success"><i class="fa fa-telegram green-color"></a>';
+                                                }
+                                                else{
+                                                    echo '<button class="btn btn-success" disabled><i class="fa fa-telegram green-color"></i>
+                                                    </button>';
+                                                }
+
+                                                echo '</td>
                                             </tr>';
                                         }
                                         closeConnection($con);
