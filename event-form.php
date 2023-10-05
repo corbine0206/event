@@ -14,7 +14,11 @@
                     $reqPersons = mysqli_fetch_array($result);
                     mysqli_free_result($result);
                 }
+                else{
+                    $message = "NO USER FOUND";
+                }
             }
+
            
         } else {
             throw new Exception('No event ID or email');
@@ -22,17 +26,23 @@
     } catch (Exception $e) {
         echo 'Error: ' . $e->getMessage();
     }
-    ?>
+?>
+
 <?php
-// Previous PHP code for form processing and data retrieval
-
 if (isset($_POST['btnSubmit'])) {
-    // Get selected technology and product choices from the form
+    // Establish a database connection if needed
+    $connection = openConnection();
+
     $email = $_GET['email'];
-
-    // Create an array to store selected product and technology data
-    $selected_data = [];
-
+    $event_id = $_GET['eventID'];
+    $updateParticipantSql = "UPDATE participants set status = 1 where event_id = '$event_id' and email = '$email'";
+    if (mysqli_query($connection, $updateParticipantSql)) {
+        echo 'Successfully update participants';
+    }
+    $updateEventSql = "UPDATE events set event_status = 2 where event_id = '$event_id'";
+    if (mysqli_query($connection, $updateEventSql)) {
+        echo "successfully event updated to 2";
+    }
     if (isset($_POST["technology"])) {
         $selectedTechnologies = $_POST["technology"];
 
@@ -53,9 +63,26 @@ if (isset($_POST['btnSubmit'])) {
              }
         }
     }
+    // Retrieve the dataset
+    $datasetSql = "SELECT technology_line, es.session_title ,pt.session_id, t.technology_name, es.date1, es.time1, es.time2
+    FROM product_technology_lines as pt 
+    join technologies as t on pt.technology_id = t.technology_id 
+    join event_sessions as es on es.session_id = pt.session_id where pt.event_id = '$event_id'";
+    
+    // Execute the SQL query and fetch the data
+    $result = mysqli_query($connection, $datasetSql);
+    
+    // Initialize an array to store dataset entries
+    $dataset = array();
+
+    // Fetch rows and add them to the dataset array
+    while ($row = mysqli_fetch_assoc($result)) {
+        $dataset[] = $row;
+    }
+
     // Get selected technologies from the form
     $selected_technologies = $_POST["technology"];
-
+    $selected_data = [];
     // Iterate through selected technologies
     foreach ($selected_technologies as $tech_id) {
         // Check if a dropdown menu associated with this technology is set
@@ -68,63 +95,82 @@ if (isset($_POST['btnSubmit'])) {
             $selected_data[] = $response;
         }
     }
+    // Combine the data into an associative array
+    $dataToPass = array(
+        "user_preferences" => $selected_data,
+        "dataset" => $dataset
+    );
 
-    // Prepare the selected data as a comma-separated string
-    $selected_data_str = implode(",", $selected_data);
+    // Encode the data as JSON
+    $jsonData = json_encode($dataToPass);
+    // Create a temporary file to store the JSON data
+    $tempFile = tempnam(sys_get_temp_dir(), 'json_data');
+    file_put_contents($tempFile, $jsonData);
 
-    // Run the Python script with the selected data as arguments
-    $output = shell_exec("recommendation.py \"$selected_data_str\"");
-    $recommended_sessions = json_decode($output, true);
+    // Use escapeshellarg to properly escape the file path for the command line
+    $fileArg = escapeshellarg($tempFile);
 
-    if ($recommended_sessions) {
-        $updateSql = "UPDATE events SET event_status = 2 WHERE event_id = '$event_id'";
-        mysqli_query($connection, $updateSql);
-        $userUpdate = "UPDATE participants SET status = 1 WHERE event_id = '$event_id' AND email = '$email'";
-        mysqli_query($connection, $userUpdate);
+    // Call your Python script with the file path as an argument
+    $command = "python new-recommendation.py $fileArg";
+    exec($command, $output, $returnCode);
 
-        // Build and send an email with recommended sessions
-        $email_subject = "Recommended Sessions";
-        $email_message = "<html><body>";
-        $email_message .= "<h2>Recommended Sessions</h2>";
-        $email_message .= "<ul>";
+    // Remove the temporary file
+    unlink($tempFile);
 
-        $uniqueSessionIds = [];
+    // Process the output or print it for debugging
 
-        foreach ($recommended_sessions as $session) {
-            $sessionId = $session[0];
+    if ($returnCode === 0) {
+        // The Python script executed successfully
+        foreach ($output as $line) {
+            // Parse the JSON data sent by the Python script
+            $json_data = json_decode($line, true);
+    
+            $previous_session_id = null; // Initialize a variable to keep track of the previous session_id
+            $printed_session_ids = []; // Initialize an array to keep track of session_ids that have been printed
 
-            if (!in_array($sessionId, $uniqueSessionIds)) {
-                echo $email_message .= "<li>Session Name: " . $session[4] . "</li>";
-                $email_message .= "<li>Date: " . $session[1] . "</li>";
-                $email_message .= "<li>Time: " . $session[2] . "</li>";
-                $email_message .= "<li>Technology: " . $session[6] . "</li>";
-
-                // Add the session ID to the uniqueSessionIds array
-                $uniqueSessionIds[] = $sessionId;
+            if ($json_data) {
+                foreach ($json_data as $result) {
+                    $session_title = $result['Session Title'];
+                    $session_id = $result['Session ID'];
+                    $date1 = $result['Date1'];
+                    $time1 = $result['Time1'];
+                    $time2 = $result['Time2'];
+                    
+                    // Check if the current session_id is different from the previous one
+                    if ($session_id !== $previous_session_id) {
+                        // Check if the current session_id has not been printed before
+                        if (!in_array($session_id, $printed_session_ids)) {
+                            $sqlInsertRecommend = "INSERT INTO recommendation (event_id, session_id, email) VALUES('$event_id', '$session_id', '$email')";
+                            if (mysqli_query($connection, $sqlInsertRecommend)) {
+                                echo "successful insert session_id". $session_id;
+                            }
+                            else{
+                                echo "failed to insert";
+                            }
+                            // Add the current session_id to the printed_session_ids array
+                            $printed_session_ids[] = $session_id;
+                        }
+                    }
+                    // Update the previous session_id
+                    $previous_session_id = $session_id;
+                }
+            } else {
+                echo 'Invalid JSON data received from Python<br>';
             }
         }
-
-        $email_message .= "</ul>";
-        $email_message .= "</body></html>";
-
-        // Set recipient email address
-        $to = $email; // Replace with the recipient's email address
-
-        // Set email headers
-        $headers = "MIME-Version: 1.0" . "\r\n";
-        $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-        $headers .= 'From: your_email@gmail.com' . "\r\n"; // Replace with your email address
-
-        // Send the email
-        mail($to, $email_subject, $email_message, $headers);
     } else {
-        echo "No recommended sessions.";
+        // There was an error executing the Python script
+        echo "Error executing Python script. Return code: $returnCode";
     }
+    header("Refresh:0");
     
-    // Add any additional code or redirects as needed after processing
-}
-?>
 
+    // Enable PHP error reporting for debugging
+    ini_set('display_errors', 1);
+    error_reporting(E_ALL);
+}
+
+?>
 
 
 <style>
@@ -168,38 +214,45 @@ if (isset($_POST['btnSubmit'])) {
         <div id="content-wrapper" class="d-flex flex-column">
                 <div id="content">
                     <?php
-                        if ($reqPersons['status'] == 1) {
-                            echo "You already answered the form";
+                        if(isset($message)){
+                            echo $message;
                         }
-                        else{ ?>
-                            <form method="post">
-                                <?php
-                                $con = openConnection();
-                                $strSql = "SELECT * FROM technologies where event_id = '$event_id'";
-                                $result = getRecord($con, $strSql);
-
-                                foreach ($result as $key => $value) {
-                                    echo '<label>';
-                                    echo '<input type="checkbox" name="technology[]" value="' . $value['technology_id'] . '"> ' . $value['technology_name'];
-                                    echo '</label>';
-
-                                    // Query the product_technology_lines table for data related to the current technology_id
-                                    $techId = $value['technology_id'];
-                                    $dropdownSql = "SELECT * FROM product_technology_lines WHERE technology_id = '$techId'";
-                                    $dropdownResult = getRecord($con, $dropdownSql);
-
-                                    // Create the dropdown menu
-                                    echo '<select class="tech-dropdown" name="dropdown_' . $techId . '">';
-                                    echo '<option value="">Select a line</option>'; // Optional initial option
-                                    foreach ($dropdownResult as $dropdownKey => $dropdownValue) {
-                                        echo '<option value="' . $dropdownValue['technology_line'] . '-'.$dropdownValue['product_id'].'-'.$dropdownValue['technology_id'].'-'.$dropdownValue['session_id'].'">' . $dropdownValue['technology_line'] . '</option>';
+                        else{
+                            if ($reqPersons['status'] == 1) {
+                                echo "You already answered the form";
+                            }
+                            else{ ?>
+                                <form method="post">
+                                    <input type="hidden" value="<?php echo $_GET['eventID'] ?>" name="event_id"> <!-- Replace "process-form.php" with your PHP script's filename -->
+                                    <input type="hidden" value="<?php echo $_GET['email'] ?>" name="email">
+                                    <?php
+                                    $con = openConnection();
+                                    $strSql = "SELECT * FROM technologies where event_id = '$event_id'";
+                                    $result = getRecord($con, $strSql);
+    
+                                    foreach ($result as $key => $value) {
+                                        echo '<label>';
+                                        echo '<input type="checkbox" name="technology[]" value="' . $value['technology_id'] . '"> ' . $value['technology_name'];
+                                        echo '</label>';
+    
+                                        // Query the product_technology_lines table for data related to the current technology_id
+                                        $techId = $value['technology_id'];
+                                        $dropdownSql = "SELECT * FROM product_technology_lines WHERE technology_id = '$techId'";
+                                        $dropdownResult = getRecord($con, $dropdownSql);
+    
+                                        // Create the dropdown menu
+                                        echo '<select class="tech-dropdown" name="dropdown_' . $techId . '">';
+                                        echo '<option value="">Select a line</option>'; // Optional initial option
+                                        foreach ($dropdownResult as $dropdownKey => $dropdownValue) {
+                                            echo '<option value="' . $dropdownValue['technology_line'] . '-'.$dropdownValue['product_id'].'-'.$dropdownValue['technology_id'].'-'.$dropdownValue['session_id'].'">' . $dropdownValue['technology_line'] . '</option>';
+                                        }
+                                        echo '</select><br>';
                                     }
-                                    echo '</select><br>';
-                                }
-                                ?>
-                                <input type="submit" name="btnSubmit" value="Submit">
-                            </form>
-                       <?php }
+                                    ?>
+                                    <input type="submit" name="btnSubmit">
+                                </form>
+                           <?php }
+                        }
                     ?>
                 
                 </div>
@@ -261,4 +314,3 @@ if (isset($_POST['btnSubmit'])) {
             });
         });
     </script>
-
