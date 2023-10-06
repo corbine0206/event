@@ -14,7 +14,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $user_id = $_POST['user_id'];
         // Insert the event title into the events table
         $eventInsertSql = "INSERT INTO events (event_title, user_id, event_status) VALUES ('$eventTitle', '$user_id', 1)";
-        echo $eventInsertSql;
         if (mysqli_query($connection, $eventInsertSql)) {
             $event_id = mysqli_insert_id($connection); // Get the event_id of the newly inserted event
 

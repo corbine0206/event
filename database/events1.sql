@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 05, 2023 at 12:46 PM
+-- Generation Time: Oct 06, 2023 at 09:56 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -81,7 +81,8 @@ INSERT INTO `comment` (`comment_id`, `comment`, `suggestion`, `similar_event`, `
 (14, 'a', 'a', 'a', 8, 'corbine.santos0206@gmail.com'),
 (15, 'a', 'a', 'a', 8, 'corbine.santos0206@gmail.com'),
 (16, 'a', 'a', 'a', 8, 'corbine.santos0206@gmail.com'),
-(17, 'a', 'a', 'a', 8, 'corbine.santos0206@gmail.com');
+(17, 'a', 'a', 'a', 8, 'corbine.santos0206@gmail.com'),
+(18, 'coment', 'sug', 'yes', 8, 'corbine.santos0206@gmail.com');
 
 -- --------------------------------------------------------
 
@@ -108,7 +109,9 @@ INSERT INTO `events` (`event_id`, `event_title`, `user_id`, `event_status`) VALU
 (5, 'sample title', 1, 1),
 (6, 'event title', 1, 2),
 (7, '1', 1, 1),
-(8, 'event title', 1, 2);
+(8, 'event title', 1, 2),
+(9, 'SAMPLE EVENT', 1, 1),
+(10, 'SAMPLE EVENT', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -165,7 +168,13 @@ INSERT INTO `participants` (`participants_id`, `event_id`, `email`, `status`) VA
 (1, 6, 'corbine.santos0206@gmail.com', 0),
 (2, 8, 'Aljonlayson21@gmail.com', 0),
 (3, 8, 'santos.johncorbine.s.020698@gmail.com', 0),
-(4, 8, 'corbine.santos0206@gmail.com', 0);
+(4, 8, 'corbine.santos0206@gmail.com', 1),
+(5, 9, 'Aljonlayson21@gmail.com', 0),
+(6, 9, 'santos.johncorbine.s.020698@gmail.com', 0),
+(7, 9, 'corbine.santos0206@gmail.com', 0),
+(8, 10, 'Aljonlayson21@gmail.com', 0),
+(9, 10, 'santos.johncorbine.s.020698@gmail.com', 0),
+(10, 10, 'corbine.santos0206@gmail.com', 0);
 
 -- --------------------------------------------------------
 
@@ -249,7 +258,11 @@ INSERT INTO `recommendation` (`recommend_id`, `event_id`, `session_id`, `email`)
 (1, 8, 11, 'corbine.santos0206@gmail.com'),
 (2, 8, 12, 'corbine.santos0206@gmail.com'),
 (3, 8, 11, 'corbine.santos0206@gmail.com'),
-(4, 8, 12, 'corbine.santos0206@gmail.com');
+(4, 8, 12, 'corbine.santos0206@gmail.com'),
+(5, 8, 11, 'corbine.santos0206@gmail.com'),
+(6, 8, 12, 'corbine.santos0206@gmail.com'),
+(7, 8, 11, 'corbine.santos0206@gmail.com'),
+(8, 8, 12, 'corbine.santos0206@gmail.com');
 
 -- --------------------------------------------------------
 
@@ -304,7 +317,37 @@ INSERT INTO `response` (`reponse_id`, `event_id`, `email`, `product_id`, `techno
 (30, 8, 'corbine.santos0206@gmail.com', 35, 19, 12, 'My technology 1'),
 (31, 8, 'corbine.santos0206@gmail.com', 29, 17, 11, 'tech line 1'),
 (32, 8, 'corbine.santos0206@gmail.com', 33, 18, 11, 'tech 1 for tech 2'),
-(33, 8, 'corbine.santos0206@gmail.com', 36, 19, 12, 'My technlogy line 2');
+(33, 8, 'corbine.santos0206@gmail.com', 36, 19, 12, 'My technlogy line 2'),
+(34, 8, 'corbine.santos0206@gmail.com', 29, 17, 11, 'tech line 1'),
+(35, 8, 'corbine.santos0206@gmail.com', 33, 18, 11, 'tech 1 for tech 2'),
+(36, 8, 'corbine.santos0206@gmail.com', 35, 19, 12, 'My technology 1'),
+(37, 8, 'corbine.santos0206@gmail.com', 29, 17, 11, 'tech line 1'),
+(38, 8, 'corbine.santos0206@gmail.com', 33, 18, 11, 'tech 1 for tech 2'),
+(39, 8, 'corbine.santos0206@gmail.com', 35, 19, 12, 'My technology 1'),
+(40, 8, 'corbine.santos0206@gmail.com', 29, 17, 11, 'tech line 1'),
+(41, 8, 'corbine.santos0206@gmail.com', 33, 18, 11, 'tech 1 for tech 2'),
+(42, 8, 'corbine.santos0206@gmail.com', 35, 19, 12, 'My technology 1'),
+(43, 8, 'corbine.santos0206@gmail.com', 29, 17, 11, 'tech line 1'),
+(44, 8, 'corbine.santos0206@gmail.com', 33, 18, 11, 'tech 1 for tech 2'),
+(45, 8, 'corbine.santos0206@gmail.com', 35, 19, 12, 'My technology 1'),
+(46, 8, 'corbine.santos0206@gmail.com', 29, 17, 11, 'tech line 1'),
+(47, 8, 'corbine.santos0206@gmail.com', 33, 18, 11, 'tech 1 for tech 2'),
+(48, 8, 'corbine.santos0206@gmail.com', 35, 19, 12, 'My technology 1'),
+(49, 8, 'corbine.santos0206@gmail.com', 29, 17, 11, 'tech line 1'),
+(50, 8, 'corbine.santos0206@gmail.com', 33, 18, 11, 'tech 1 for tech 2'),
+(51, 8, 'corbine.santos0206@gmail.com', 37, 20, 12, 'You technology line 1'),
+(52, 8, 'corbine.santos0206@gmail.com', 29, 17, 11, 'tech line 1'),
+(53, 8, 'corbine.santos0206@gmail.com', 33, 18, 11, 'tech 1 for tech 2'),
+(54, 8, 'corbine.santos0206@gmail.com', 35, 19, 12, 'My technology 1'),
+(55, 8, 'corbine.santos0206@gmail.com', 29, 17, 11, 'tech line 1'),
+(56, 8, 'corbine.santos0206@gmail.com', 33, 18, 11, 'tech 1 for tech 2'),
+(57, 8, 'corbine.santos0206@gmail.com', 35, 19, 12, 'My technology 1'),
+(58, 8, 'corbine.santos0206@gmail.com', 31, 17, 11, 'tech line 3'),
+(59, 8, 'corbine.santos0206@gmail.com', 37, 20, 12, 'You technology line 1'),
+(60, 8, 'corbine.santos0206@gmail.com', 39, 21, 13, 'she tech line 1'),
+(61, 8, 'corbine.santos0206@gmail.com', 30, 17, 11, 'tech line 2'),
+(62, 8, 'corbine.santos0206@gmail.com', 33, 18, 11, 'tech 1 for tech 2'),
+(63, 8, 'corbine.santos0206@gmail.com', 36, 19, 12, 'My technlogy line 2');
 
 -- --------------------------------------------------------
 
@@ -354,7 +397,31 @@ INSERT INTO `survey` (`survey_id`, `comment_id`, `session_id`) VALUES
 (29, 15, 12),
 (30, 16, 11),
 (31, 16, 12),
-(32, 17, 11);
+(32, 17, 11),
+(33, 18, 11),
+(34, 18, 12),
+(35, 18, 13);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `survey_technologies`
+--
+
+CREATE TABLE `survey_technologies` (
+  `survey_tech_id` int(11) NOT NULL,
+  `survey_id` int(11) NOT NULL,
+  `technology_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `survey_technologies`
+--
+
+INSERT INTO `survey_technologies` (`survey_tech_id`, `survey_id`, `technology_id`) VALUES
+(1, 33, 17),
+(2, 34, 19),
+(3, 35, 21);
 
 -- --------------------------------------------------------
 
@@ -477,6 +544,12 @@ ALTER TABLE `survey`
   ADD PRIMARY KEY (`survey_id`);
 
 --
+-- Indexes for table `survey_technologies`
+--
+ALTER TABLE `survey_technologies`
+  ADD PRIMARY KEY (`survey_tech_id`);
+
+--
 -- Indexes for table `technologies`
 --
 ALTER TABLE `technologies`
@@ -502,13 +575,13 @@ ALTER TABLE `attendance`
 -- AUTO_INCREMENT for table `comment`
 --
 ALTER TABLE `comment`
-  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `event_sessions`
@@ -520,7 +593,7 @@ ALTER TABLE `event_sessions`
 -- AUTO_INCREMENT for table `participants`
 --
 ALTER TABLE `participants`
-  MODIFY `participants_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `participants_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `product_technology_lines`
@@ -532,19 +605,25 @@ ALTER TABLE `product_technology_lines`
 -- AUTO_INCREMENT for table `recommendation`
 --
 ALTER TABLE `recommendation`
-  MODIFY `recommend_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `recommend_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `response`
 --
 ALTER TABLE `response`
-  MODIFY `reponse_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `reponse_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT for table `survey`
 --
 ALTER TABLE `survey`
-  MODIFY `survey_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `survey_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+
+--
+-- AUTO_INCREMENT for table `survey_technologies`
+--
+ALTER TABLE `survey_technologies`
+  MODIFY `survey_tech_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `technologies`
