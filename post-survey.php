@@ -59,8 +59,13 @@
         display: none;
     }
     .bg-primary {
-    background-color: #007bff!important;
+    background-color: #C9C9C8!important;
 }
+/* Center the content both horizontally and vertically */
+.vh-100 {
+  min-height: 100vh;
+}
+
 /* Add this CSS to your stylesheet or within a <style> tag in your HTML */
 
 
@@ -166,12 +171,15 @@
                         <?php
                         }
                         else{
-                            echo "
-                                    <div class='card row bg-primary'>
-                                        <div class='card-body text-center'>
-                                            <h5>No Session attended</h5>
+                            echo '
+                                <div class="col-md-12 d-flex justify-content-center align-items-center vh-100">
+                                    <div class="card bg-primary">
+                                        <div class="card-body text-center">
+                                        <h5>No Session attended</h5>
                                         </div>
-                                    </div>";
+                                    </div>
+                                </div>
+                                ';
                         }
                         ?>
                     </div>

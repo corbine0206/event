@@ -1,4 +1,4 @@
-<?php include'script.php'; ?>
+<?php include 'script.php'; ?>
 <?php
 session_start();
 include 'connection.php'; // Include your database connection script
@@ -136,10 +136,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         // Close the CSV file
         fclose($csvFile);
-
-        // Display the values from the first column
-        echo "<h2>Values from the First Column of the Uploaded CSV</h2>";
-
         // Remove trailing comma
         $firstColumnValues = rtrim($firstColumnValues, ',');
 
@@ -168,7 +164,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $mail->Body = $emailContent;
 
             if ($mail->send()) {
-                echo 'Email sent to ' . $value . '<br>';
                 
                 // Assuming you have established a valid database connection
                 $participantsSql = "INSERT INTO participants(event_id, email, status) VALUES('$event_id', '$value', 0)";
@@ -180,7 +175,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } else {
         echo "Error uploading the file.";
     }
-
+    echo "<script>
+alert('Successfully add event');
+window.location.href='event.php';
+</script>";
     mysqli_close($connection);
 }
 ?>

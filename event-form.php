@@ -20,7 +20,7 @@
                     mysqli_free_result($result);
                 }
                 else{
-                    $message = "NO USER FOUND";
+                    $message = "<h3>NO USER FOUND</h3>";
                 }
             }
 
@@ -209,7 +209,7 @@ if (isset($_POST['btnSubmit'])) {
 
 <style>
         /* Center the container */
-        body {
+        .body {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -236,7 +236,18 @@ if (isset($_POST['btnSubmit'])) {
             background-color: #f7f7f7;
             border-radius: 5px;
         }
+        .sticky-footer {
+            position: fixed;
+            text-align: center;
+            bottom: 0;
+            width: 100%;
+            background-color: #ffffff; /* You can change the background color as needed */
+            border-top: 1px solid #e0e0e0; /* Optional: Add a border at the top of the footer */
+            padding: 10px 0; /* Optional: Add padding to the footer content */
+            box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.1); /* Optional: Add a shadow at the bottom */
+        }
     </style>
+    
 <body id="page-top">
 
     <!-- Page Wrapper -->
@@ -245,7 +256,7 @@ if (isset($_POST['btnSubmit'])) {
         <?php //include 'sidebar.php'; ?>
 
         <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content-wrapper"  class="d-flex flex-column body">
                 <div id="content">
                     <?php
                         if(isset($message)){
