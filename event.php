@@ -109,7 +109,6 @@
                                             <th>Session</th>
                                             <th>Technology</th>
                                             <th>Action</th>
-                                            <th>Date andt time highest</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -156,20 +155,19 @@
                                                     <a href="event-session.php?eventID=' . $event['event_id'] . '" class="btn btn-primary"><i class="fas fa-eye"></i></a>';
 
                                                 }
-                                            echo '
-                                                </td>
-                                                <td>';
                                                 $lastHighestDateTime = getLastHighestDateTime($con, $event['event_id']);
                                                 $dateToday = date('Y-m-d h:i:s');
-                                                if($lastHighestDateTime < $dateToday){
-                                                    echo '<a href="send-email-event-done.php?eventID=' . $event['event_id'] . '" class="btn btn-success"><i class="fa fa-telegram green-color"></a>';
+                                                if ($lastHighestDateTime < $dateToday) {
+                                                    $linkOrButton = '<a href="send-email-event-done.php?eventID=' . $event['event_id'] . '" class="btn btn-success"><i class="fa fa-telegram green-color"></i></a>';
+                                                } else {
+                                                    $linkOrButton = '<button class="btn btn-success" disabled><i class="fa fa-telegram green-color"></i></button>';
                                                 }
-                                                else{
-                                                    echo '<button class="btn btn-success" disabled><i class="fa fa-telegram green-color"></i>
-                                                    </button>';
-                                                }
-
-                                                echo '</td>
+                                                
+                                                echo $linkOrButton;
+                                            echo '
+                                                </td>
+                                                ';
+                                                echo '
                                             </tr>';
                                         }
                                         closeConnection($con);

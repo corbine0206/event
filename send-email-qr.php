@@ -13,9 +13,9 @@ if (isset($_POST['btnSubmit'])) {
     echo "<img src='$outputFileName' alt='QR Code'>";
     $email_subject = "Recommended Sessions";
     $email_message = "<html><body> <h2>Recommended Sessions</h2> <img src='laundryandwash.com/'.$email.'.png'> </body></html>";
-    $headers = "MIME-Version: 1.0" . "\r\n";
-    $headers = "From: webmaster@example.com\r\n";
-    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+    $headers = "MIME-Version: 1.0" . "\r\n From: webmaster@example.com\r\n Content-Type: text/html; charset=UTF-8\r\n";
+    $headers = "";
+    $headers .= "";
     $to = $email;
     mail($to, $email_subject, $email_message, $headers);
 }

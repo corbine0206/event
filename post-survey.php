@@ -1,6 +1,10 @@
 <?php
     session_start();
     include 'connection.php';
+    require 'vendor/autoload.php'; // Include Composer's autoloader
+
+    use PHPMailer\PHPMailer\PHPMailer;
+    use PHPMailer\PHPMailer\Exception;
     $event_id = isset($_GET['eventID']) ? $_GET['eventID'] : null;
     $email = isset($_GET['email']) ? $_GET['email'] : null;
     
@@ -46,6 +50,7 @@
         return $technologiesArray;
     }
 ?>
+    <?php include 'link.php'; ?>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
 <style>
@@ -53,6 +58,12 @@
     .hidden {
         display: none;
     }
+    .bg-primary {
+    background-color: #007bff!important;
+}
+/* Add this CSS to your stylesheet or within a <style> tag in your HTML */
+
+
 </style>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -156,7 +167,7 @@
                         }
                         else{
                             echo "
-                                    <div clas='card row'>
+                                    <div class='card row bg-primary'>
                                         <div class='card-body text-center'>
                                             <h5>No Session attended</h5>
                                         </div>
@@ -219,7 +230,66 @@ if (isset($_POST['btnSubmit'])) {
                 }
             }
         }
+        $sqlProductRec = "SELECT * FROM survey_technologies as st 
+                           join response as r on st.technology_id = r.technology_id
+                           join product_technology_lines as pt on r.product_id = pt.product_id
+                           where r.event_id = '$event_id' & email ='$email'";
+        $resultProd = getRecord($connection, $sqlProductRec);
 
+        if ($resultProd) {
+            $printedProductIds = [];
+            $productRecommended = [];
+            foreach ($resultProd as $key => $prod) {
+                $productId = $prod['product_id'];
+                
+                // Check if this product_id has already been printed
+                if (!in_array($productId, $printedProductIds)) {
+                    // Print the product_id
+                    echo "Product ID: " . $productId . "<br>";
+                    
+                    // Print other data from the row
+                    echo "Product Name: " . $prod['product_name'] . "<br>";
+                    // Add more fields as needed
+                    
+                    // Add the product_id to the printedProductIds array
+                    $printedProductIds[] = $productId;
+                    $productRecommended[] =  $prod['product_name'];
+                }
+        
+                // If you want to print other data for each occurrence of the same product_id, you can do it here within this loop.
+            }
+        } else {
+            echo "NO DATA FOUND";
+        }
+        // Format the $productRecommended array as a list
+        $productRecommendedList = implode("<br>", $productRecommended);
+        $emailContent = '<br><strong>Product Recommended:</strong><br>' . $productRecommendedList;
+        $mail = new PHPMailer(true);
+        // SMTP settings (you may need to configure these)
+        $mail->isSMTP();
+        $mail->Host = 'mail.laundryandwash.com';
+        $mail->SMTPSecure = 'tls'; // Use 'tls' for TLS encryption
+        $mail->SMTPAuth = true;
+        $mail->Username = 'event@laundryandwash.com';
+        $mail->Password = 'GhZ%3SiW]x=Z';
+        $mail->Port = 587; // Change to your SMTP port
+
+        // Set the "From" address correctly
+        $mail->setFrom('event@laundryandwash.com', 'Event Organizer');
+
+        $mail->addAddress($email); // Recipient's email address
+        $mail->isHTML(true);
+        $mail->Subject = "Product Recommendation";
+
+        // Embed the QR code image in the email body
+        $mail->Body = $emailContent;
+
+        // Send the email
+        if ($mail->send()) {
+            echo "Email sent successfully.";
+        } else {
+            echo "Email sending failed: " . $mail->ErrorInfo;
+        }
         echo '<script type="text/javascript">
                 swal({
                     title: "Success",
@@ -228,7 +298,7 @@ if (isset($_POST['btnSubmit'])) {
                     timer: 2000,
                     showConfirmButton: false
                 }).then(function() {
-                    window.location.href = "post-survey.php";
+                    window.location.href = "./post-survey.php";
                 });
             </script>';
     }
