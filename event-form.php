@@ -26,10 +26,12 @@
 
            
         } else {
-            throw new Exception('No event ID or email');
+            $message = "";
+            throw new Exception('');
         }
     } catch (Exception $e) {
         echo 'Error: ' . $e->getMessage();
+        $message = "";
     }
 ?>
 
@@ -265,6 +267,9 @@ if (isset($_POST['btnSubmit'])) {
                         else{
                             if ($reqPersons['status'] == 1) {
                                 echo "You already answered the form";
+                            }
+                            elseif(isset($message)){
+                                echo "No email and event ID found";
                             }
                             else{ ?>
                                 <form method="post">
