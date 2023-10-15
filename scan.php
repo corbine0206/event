@@ -45,13 +45,16 @@
 
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-fw fa-calendar"></i>Event</h6>
+                            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-fw fa-calendar"></i>SCAN QR</h6>
                         </div>
                         <div class="card-body">
                         <h1>QR Code Scanner</h1>
                         <?php
                             if (isset($_GET['success']) && $_GET['success'] == 1) {
                                 echo '<p>Successfully Attended! <b>'. $_GET['email'] .'</b> </p>';
+                            }
+                            elseif (isset($_GET['success']) && $_GET['success'] == 2) {
+                                echo "<p>Already scanned</p>";
                             }
                         ?>
                         <video id="qr-video" width="400" height="300" autoplay playsinline></video>

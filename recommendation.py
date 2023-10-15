@@ -1,58 +1,78 @@
 import sys
-import pymysql
-from datetime import datetime
 import json
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
-# Database connection setup
-conn = pymysql.connect(
-    host='localhost',       # Use your DB_SERVER value here
-    user='root',            # Use your DB_USERNAME value here
-    password='',            # Use your DB_PASSWORD value here
-    database='event'        # Use your DB_NAME value here
-)
-cursor = conn.cursor()
+try:
+    # Get the file path from command-line arguments
+    if len(sys.argv) < 2:
+        print("Usage: python new-recommendation.py <file_path>")
+        sys.exit(1)
 
-# Guest's selected product names (replace with actual data from PHP)
-selected_data_str = sys.argv[1] if len(sys.argv) > 1 else ""
-selected_data = selected_data_str.split(",") if selected_data_str else []
+    file_path = sys.argv[1]
 
-# Get the current datetime
-current_datetime = datetime.now()
+    # Read the JSON data from the file
+    with open(file_path, 'r') as file:
+        data = file.read()
 
-# Try to get a recommended session based on exact matches for date1, time1, and time2
-cursor.execute("""
-    SELECT DISTINCT es.session_id, es.date1, es.time1, es.time2, es.session_title, es.event_id, p.technology_line, p.product_id
-    FROM event_sessions AS es
-    JOIN product_technology_lines AS p ON es.session_id = p.session_id
-    WHERE p.technology_line IN ("tech line 1", "tech line 1", "tech line 1")
-    AND NOT EXISTS (
-        SELECT 1
-        FROM event_sessions AS s
-        WHERE s.date1 = es.date1
-        AND s.time1 = es.time1
-        AND s.time2 = es.time2
-        AND (
-            s.session_id <> es.session_id  # Exclude the current session
-        )
-    )
-""", selected_data)  # Pass the tuple directly
+    # Attempt to parse the JSON data
+    data_dict = json.loads(data)
 
-recommended_sessions = cursor.fetchall()
+    # Extract user preferences and dataset
+    user_preferences = data_dict.get("user_preferences", [])
+    dataset = data_dict.get("dataset", [])
 
-# If no exact matches were found, get a recommended session without considering the schedule
-if not recommended_sessions:
-    cursor.execute("""
-        SELECT DISTINCT es.session_id, es.date1, es.time1, es.time2, es.session_title, es.event_id, p.technology_line, p.product_id
-        FROM event_sessions AS es
-        JOIN product_technology_lines AS p ON es.session_id = p.session_id
-        WHERE p.technology_line IN ("tech line 1", "tech line 1", "tech line 1")
+    # Check if user_preferences and dataset are not empty
+    if not user_preferences:
+        print("Error: Empty user preferences")
+        sys.exit(1)
 
-    """, selected_data)  # Pass the tuple directly
+    if not dataset:
+        print("Error: Empty dataset")
+        sys.exit(1)
 
-    recommended_sessions = cursor.fetchall()
+    # Combine user preferences and dataset into a list of documents
+    documents = user_preferences + [entry.get("technology_line", "") for entry in dataset]
 
-# Close database connection
-conn.close()
+    # Create a TF-IDF vectorizer to convert text data into numerical form
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(documents)
 
-# Print or return recommended sessions
-print(json.dumps(recommended_sessions))
+    # Calculate pairwise cosine similarities
+    similarities = cosine_similarity(tfidf_matrix)
+
+    # Find the most similar technology line for each user preference
+    user_preference_scores = similarities[:len(user_preferences), len(user_preferences):]
+
+    # Find the technology line index with the highest similarity for each user preference
+    best_matches = np.argmax(user_preference_scores, axis=1)
+
+    # Create a list to store the results
+    results = []
+
+    # Prepare and store the results
+    for i, preference in enumerate(user_preferences):
+        best_match_index = best_matches[i]
+        best_match_entry = dataset[best_match_index]
+        result = {
+            "User Preference": preference,
+            "Best Match Technology Line": best_match_entry.get("technology_line", ""),
+            "Session ID": best_match_entry.get("session_id", ""),
+            "Session Title": best_match_entry.get("session_title", ""),  # Include session_title field
+            "Date1": best_match_entry.get("date1", ""),
+            "Time1": best_match_entry.get("time1", ""),
+            "Time2": best_match_entry.get("time2", ""),
+            "Cosine Similarity Score": user_preference_scores[i, best_match_index],
+        }
+        results.append(result)
+
+    # Convert the results to JSON format
+    results_json = json.dumps(results)
+
+    # Print the JSON results
+    print(results_json)
+
+except Exception as e:
+    print("Error:", str(e))
+    sys.exit(1)

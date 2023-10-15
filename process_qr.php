@@ -12,16 +12,25 @@
         $dateIn = date("Y-m-d");
         $timeIn = date("H:i:s");
 
-        // Insert data into the database
-        $sqlInsert = "INSERT INTO attendance (event_id, session_id, email, dateIn, timeIn) 
-                    VALUES ('$event_id', '$session_id', '$scannedData', '$dateIn', '$timeIn')";
-
-        if ($connection->query($sqlInsert) === TRUE) {
-            header("location: scan.php?eventID=$event_id&session_id=$session_id&success=1&email=$scannedData");
-        } else {
+        $sqlSearch = "SELECT * FROM attendance where event_id = '$event_id' and email='$scannedData' and session_id='$session_id'";
+        $result = $connection->query($sqlSearch);
+        if ($result->num_rows === 0) {
+            // Insert data into the database
+            $sqlInsert = "INSERT INTO attendance (event_id, session_id, email, dateIn, timeIn) 
+                            VALUES ('$event_id', '$session_id', '$scannedData', '$dateIn', '$timeIn')";
+            if ($connection->query($sqlInsert) === TRUE) {
+                header("location: scan.php?eventID=$event_id&session_id=$session_id&success=1&email=$scannedData");
+            } 
+            else {
             echo "Error: " . $sqlInsert . "<br>" . $conn->error;
+            }
         }
-    } else {
+        else{
+            header("location: scan.php?eventID=$event_id&session_id=$session_id&success=2&email=$scannedData");
+        }
+        
+    } 
+    else {
         http_response_code(400); // Bad Request
         echo "Invalid input data";
     }

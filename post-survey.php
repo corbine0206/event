@@ -104,7 +104,6 @@
 </script>
 
 
-
 <!-- Your HTML code remains unchanged -->
 
 <body id="page-top">
@@ -253,10 +252,10 @@ if (isset($_POST['btnSubmit'])) {
                 // Check if this product_id has already been printed
                 if (!in_array($productId, $printedProductIds)) {
                     // Print the product_id
-                    echo "Product ID: " . $productId . "<br>";
+                    
                     
                     // Print other data from the row
-                    echo "Product Name: " . $prod['product_name'] . "<br>";
+                    
                     // Add more fields as needed
                     
                     // Add the product_id to the printedProductIds array
@@ -272,6 +271,15 @@ if (isset($_POST['btnSubmit'])) {
         // Format the $productRecommended array as a list
         $productRecommendedList = implode("<br>", $productRecommended);
         $emailContent = '<br><strong>Product Recommended:</strong><br>' . $productRecommendedList;
+
+        // Create a personalized message
+        $emailContent .= '<br><br>Dear '.$email.',<br><br>';
+        $emailContent .= 'We are excited to provide you with personalized product recommendations based on the technologies and preferences you specified during the session you attended.';
+
+        // Continue with the rest of your email content
+        $emailContent .= '<br><br>Please find below the list of products that we think you might be interested in:';
+        $emailContent .= '<br><br>' . $productRecommendedList;
+
         $mail = new PHPMailer(true);
         // SMTP settings (you may need to configure these)
         $mail->isSMTP();
@@ -294,11 +302,7 @@ if (isset($_POST['btnSubmit'])) {
 
         // Send the email
         if ($mail->send()) {
-            echo "Email sent successfully.";
-        } else {
-            echo "Email sending failed: " . $mail->ErrorInfo;
-        }
-        echo '<script type="text/javascript">
+            echo '<script type="text/javascript">
                 swal({
                     title: "Success",
                     text: "Redirecting in 2 seconds.\nSuccessfully Answered survey",
@@ -309,6 +313,9 @@ if (isset($_POST['btnSubmit'])) {
                     window.location.href = "./post-survey.php";
                 });
             </script>';
+        } else {
+            echo "Email sending failed: " . $mail->ErrorInfo;
+        }
     }
 }
 

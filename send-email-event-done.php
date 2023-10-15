@@ -1,13 +1,15 @@
 <?php
+include 'connection.php';
+$connection = openConnection();
+// Fetch records from the database
+$event_id = $_GET['eventID'];
+$strSql = "SELECT * FROM attendance where event_id = '$event_id'";
+$result = getRecord($connection, $strSql);
+
 // Enable error reporting
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 set_time_limit(60); // Increase the time limit to 60 seconds (adjust as needed)
-
-// Email parameters
-$to = "corbine.santos0206@gmail.com";
-$subject = "Test Email";
-$message = "This is a test email sent from PHP with SMTP authentication and SSL/TLS encryption.";
 
 // Set the HELO name
 $from = "event@laundryandwash.com"; // Use a valid email address from your domain
@@ -30,14 +32,24 @@ $mail->SMTPSecure = 'tls'; // Use 'tls' for TLS encryption
 $mail->SMTPAuth = true;
 $mail->Username = $username;
 $mail->Password = $password;
-$mail->setFrom($from);
-$mail->addAddress($to);
-$mail->Subject = $subject;
-$mail->msgHTML($message);
 
 try {
-    $mail->send();
-    echo "Email sent successfully.";
+    foreach ($result as $row) {
+        // Email parameters for each record
+        $to = $row['email'];
+        $event_id = $row['event_id'];
+        $subject = "POST SURVEY EVENT";
+        $message = '<a href="http://localhost/event/post-survey.php?eventID=' . $event_id . '&email=' . $to . '">click to access post survey event</a>';
+        
+        $mail->setFrom($from);
+        $mail->addAddress($to);
+        $mail->Subject = $subject;
+        $mail->msgHTML($message);
+        
+        $mail->send();
+        
+        echo "Email sent successfully to: " . $to . "<br>";
+    }
 } catch (Exception $e) {
     echo "Email sending failed. Error: " . $mail->ErrorInfo;
 }

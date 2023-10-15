@@ -31,14 +31,6 @@ if (isset($_POST['btnSubmit'])) {
 
     $email = $_GET['email'];
     $event_id = $_GET['eventID'];
-    $updateParticipantSql = "UPDATE participants set status = 1 where event_id = '$event_id' and email = '$email'";
-    if (mysqli_query($connection, $updateParticipantSql)) {
-        echo 'Successfully update participants';
-    }
-    $updateEventSql = "UPDATE events set event_status = 2 where event_id = '$event_id'";
-    if (mysqli_query($connection, $updateEventSql)) {
-        echo "successfully event updated to 2";
-    }
     if (isset($_POST["technology"])) {
         $selectedTechnologies = $_POST["technology"];
 
@@ -53,7 +45,7 @@ if (isset($_POST['btnSubmit'])) {
              $insertSql = "INSERT INTO response (event_id, email, product_id, technology_id, session_id, response) VALUES ('$event_id','$email', '$product_id', '$technology_id', '$session_id', '$response')";
 
              if (mysqli_query($connection, $insertSql)) {
-                 echo 'Data inserted successfully for technology ID ' . $selectedTechId . '<br>';
+                 
              } else {
                  echo 'Error inserting data for technology ID ' . $selectedTechId . ': ' . mysqli_error($con) . '<br>';
              }
@@ -99,71 +91,35 @@ if (isset($_POST['btnSubmit'])) {
 
     // Encode the data as JSON
     $jsonData = json_encode($dataToPass);
-    // Create a temporary file to store the JSON data
-    $tempFile = tempnam(sys_get_temp_dir(), 'json_data');
-    file_put_contents($tempFile, $jsonData);
 
-    // Use escapeshellarg to properly escape the file path for the command line
-    $fileArg = escapeshellarg($tempFile);
+    // Close the database connection if it's open
+    mysqli_close($connection);
 
-    // Call your Python script with the file path as an argument
-    $command = "python new-recommendation.py $fileArg";
-    exec($command, $output, $returnCode);
+    // Define the API endpoint URL for localhost
+    $apiEndpoint = 'http://localhost/event/receive_json.php'; // Adjust the path to your project folder
 
-    // Remove the temporary file
-    unlink($tempFile);
+    // Initialize cURL session
+    $ch = curl_init($apiEndpoint);
 
-    // Process the output or print it for debugging
+    // Set cURL options to send a POST request with JSON data
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-    if ($returnCode === 0) {
-        // The Python script executed successfully
-        foreach ($output as $line) {
-            // Parse the JSON data sent by the Python script
-            $json_data = json_decode($line, true);
-    
-            $previous_session_id = null; // Initialize a variable to keep track of the previous session_id
-            $printed_session_ids = []; // Initialize an array to keep track of session_ids that have been printed
+    // Execute the cURL request
+    $response = curl_exec($ch);
 
-            if ($json_data) {
-                foreach ($json_data as $result) {
-                    $session_title = $result['Session Title'];
-                    $session_id = $result['Session ID'];
-                    $date1 = $result['Date1'];
-                    $time1 = $result['Time1'];
-                    $time2 = $result['Time2'];
-                    
-                    // Check if the current session_id is different from the previous one
-                    if ($session_id !== $previous_session_id) {
-                        // Check if the current session_id has not been printed before
-                        if (!in_array($session_id, $printed_session_ids)) {
-                            $sqlInsertRecommend = "INSERT INTO recommendation (event_id, session_id, email) VALUES('$event_id', '$session_id', '$email')";
-                            if (mysqli_query($connection, $sqlInsertRecommend)) {
-                                echo "successful insert session_id". $session_id;
-                            }
-                            else{
-                                echo "failed to insert";
-                            }
-                            // Add the current session_id to the printed_session_ids array
-                            $printed_session_ids[] = $session_id;
-                        }
-                    }
-                    // Update the previous session_id
-                    $previous_session_id = $session_id;
-                }
-            } else {
-                echo 'Invalid JSON data received from Python<br>';
-            }
-        }
-    } else {
-        // There was an error executing the Python script
-        echo "Error executing Python script. Return code: $returnCode";
+    // Check for cURL errors
+    if (curl_errno($ch)) {
+        echo 'cURL error: ' . curl_error($ch);
     }
-    header("Refresh:0");
-    
 
-    // Enable PHP error reporting for debugging
-    ini_set('display_errors', 1);
-    error_reporting(E_ALL);
+    // Close cURL session
+    curl_close($ch);
+
+    // You can handle the response from the API here if needed
+    echo 'Response from API: ' . $response;
 }
 
 ?>

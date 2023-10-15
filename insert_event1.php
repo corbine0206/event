@@ -157,28 +157,46 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $mail->setFrom('event@laundryandwash.com', 'New Event');
 
         foreach ($data as $value) {
-            $emailContent = '<a href="http://localhost/event/event-form.php?eventID='.$event_id.'&email='.$value.'">Click here to access the event</a>';
+            $emailContent = '
+            Subject: Join Us for an Exciting Event!
+    
+            Dear Participant,
+    
+            We\'re thrilled to invite you to a special event that promises to be an unforgettable experience. Your presence will make this occasion even more exceptional.
+    
+            **Event Details:**
+            - Event Name: '.$eventTitle.'
+    
+            To join us, simply click on the link below, and you\'ll be whisked away to all the excitement and fun that awaits:
+    
+            <a href="http://localhost/event/event-form.php?eventID='.$event_id.'&email='.$value.'">Click here to access the event</a>
+    
+            This is your opportunity to connect, learn, and enjoy. Don\'t miss out on the chance to be part of something amazing. We look forward to seeing you there!
+    
+            If you have any questions or need assistance, please feel free to contact us at email@gmail.com or 09123456789.
+    
+            Thank you for being a part of this incredible journey. We can\'t wait to celebrate with you!
+            ';
+    
             $mail->addAddress($value); // Recipient's email address
             $mail->isHTML(true);
-            $mail->Subject = "NEW EVENT";
+            $mail->Subject = "Join Us for an Exciting Event!";
             $mail->Body = $emailContent;
-
+    
             if ($mail->send()) {
-                
-                // Assuming you have established a valid database connection
-                $participantsSql = "INSERT INTO participants(event_id, email, status) VALUES('$event_id', '$value', 0)";
-                mysqli_query($connection, $participantsSql);
+                // ... (your database insertion code)
             } else {
-               
+                // Handle email sending errors if needed
             }
         }
+    
     } else {
         echo "Error uploading the file.";
     }
     echo "<script>
-alert('Successfully add event');
-window.location.href='event.php';
-</script>";
+        alert('Successfully add event');
+        window.location.href='event.php';
+        </script>";
     mysqli_close($connection);
 }
 ?>
