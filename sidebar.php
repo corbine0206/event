@@ -39,7 +39,7 @@
                 </a>
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Manage User</h6>
+                        <h6 class="collapse-header">Manage Event</h6>
                         <a class="collapse-item" href="event-add.php">Add Event</a>
                         <a class="collapse-item" href="event.php">Event</a>
                     </div>

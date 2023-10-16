@@ -336,7 +336,7 @@ function getEvent($connection, $event_id) {
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2023</span>
+                        <span>Copyright Demand &copy; Generation</span>
                     </div>
                 </div>
             </footer>
