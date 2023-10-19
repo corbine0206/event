@@ -285,23 +285,41 @@ if (isset($_POST['btnSubmit'])) {
                                 <div class="form-group">
                                     <?php
                                     $con = openConnection();
-                                    $strSql = "SELECT * FROM technologies where event_id = '$event_id'";
+                                    $strSql = "SELECT DISTINCT t.technology_name
+                                            FROM technologies t
+                                            WHERE t.event_id = '$event_id'";
                                     $result = getRecord($con, $strSql);
+                                    
+                                    // Create an array to store dropdown options for each technology name
+                                    $dropdownOptions = [];
+
                                     foreach ($result as $key => $value) {
-                                        echo '
-                                            <label for="technology[]" class="form-check larger-text label-with-padding" style="margin-top: 20%;">
-                                                <input type="checkbox" class="form-check-input larger-checkbox" name="technology[]" id="technology[]" value="' . $value['technology_id'] . '"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' . $value['technology_name'] . '
-                                            </label>
-                                        ';
-                                        // Query the product_technology_lines table for data related to the current technology_id
-                                        $techId = $value['technology_id'];
-                                        $dropdownSql = "SELECT * FROM product_technology_lines WHERE technology_id = '$techId'";
+                                        $techName = $value['technology_name'];
+                                        
+                                        // Query the product_technology_lines table for data related to the current technology_name
+                                        $dropdownSql = "SELECT * FROM product_technology_lines as pt join technologies as t on pt.technology_id = t.technology_id WHERE technology_name = '$techName'";
                                         $dropdownResult = getRecord($con, $dropdownSql);
-                                        // Create the dropdown menu
-                                        echo '<select class="tech-dropdown form-control larger-dropdown" name="dropdown_' . $techId . '">';
-                                        echo '<option value="">Select a line</option>';
+                                        
+                                        // Add the options to the dropdownOptions array
+                                        $dropdownOptions[$techName] = [];
                                         foreach ($dropdownResult as $dropdownKey => $dropdownValue) {
-                                            echo '<option value="' . $dropdownValue['technology_line'] . '-' . $dropdownValue['product_id'] . '-' . $dropdownValue['technology_id'] . '-' . $dropdownValue['session_id'] . '">' . $dropdownValue['technology_line'] . '</option>';
+                                            $optionValue = $dropdownValue['technology_line'] . '-' . $dropdownValue['product_id'] . '-' . $dropdownValue['technology_id'] . '-' . $dropdownValue['session_id'];
+                                            $optionText = $dropdownValue['technology_line'];
+                                            $dropdownOptions[$techName][$optionValue] = $optionText;
+                                        }
+                                    }
+                                    
+                                    // Loop through the technology names and create a single checkbox and dropdown for each
+                                    foreach ($dropdownOptions as $techName => $options) {
+                                        echo '<label for="technology[]" class="form-check larger-text label-with-padding" style="margin-top: 20%;">';
+                                        echo '<input type="checkbox" class="form-check-input larger-checkbox" name="technology[]" id="technology[]" value="' . $techName . '"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' . $techName;
+                                        echo '</label>';
+                                        
+                                        // Create the dropdown menu
+                                        echo '<select class="tech-dropdown form-control larger-dropdown" name="dropdown_' . $techName . '">';
+                                        echo '<option value="">Select a line</option>';
+                                        foreach ($options as $optionValue => $optionText) {
+                                            echo '<option value="' . $optionValue . '">' . $optionText . '</option>';
                                         }
                                         echo '</select>';
                                     }
@@ -309,6 +327,7 @@ if (isset($_POST['btnSubmit'])) {
                                 </div>
                                 <button type="submit" class="btn btn-primary btn-lg" name="btnSubmit">Submit</button>
                             </form>
+
                         </div>
                     </div>
                 <?php } } ?>
